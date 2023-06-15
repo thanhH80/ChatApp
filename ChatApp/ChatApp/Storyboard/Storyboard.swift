@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+enum Storyboard: String {
+    case conversation = "Conversation"
+}
