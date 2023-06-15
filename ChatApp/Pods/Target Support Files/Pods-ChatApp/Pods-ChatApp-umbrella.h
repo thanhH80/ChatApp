@@ -1,16 +1,3 @@
-#ifdef __OBJC__
-#import <UIKit/UIKit.h>
-#else
-#ifndef FOUNDATION_EXPORT
-#if defined(__cplusplus)
-#define FOUNDATION_EXPORT extern "C"
-#else
-#define FOUNDATION_EXPORT extern
-#endif
-#endif
-#endif
-
-
-FOUNDATION_EXPORT double Pods_ChatAppVersionNumber;
-FOUNDATION_EXPORT const unsigned char Pods_ChatAppVersionString[];
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:91e89d0aafa0ab344afad99cb4e975b0ddc2d26839667f1728543cf853504591
+size 316
