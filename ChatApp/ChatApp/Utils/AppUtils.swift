@@ -18,5 +18,18 @@ class AppUtils: NSObject {
             completion?()
         }
     }
+}
+
+extension AppUtils {
+    class func setRootViewIsConversation() {
+        let vc = MainTabbarController.create()
+        let rootVC = BaseNavigationController(rootViewController: vc)
+        setRootController(root: rootVC, animated: false)
+    }
     
+    class func setRootViewIsLoginVC() {
+        let vc = LoginViewController.create()
+        let rootVC = BaseNavigationController(rootViewController: vc)
+        setRootController(root: rootVC, animated: false)
+    }
 }
