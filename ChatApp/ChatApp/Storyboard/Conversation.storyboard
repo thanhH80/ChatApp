@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Conversation View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController storyboardIdentifier="ConversationViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="ConversationViewController" customModule="RealTimeChat" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="mCg-eO-WWl">
+                                <rect key="frame" x="0.0" y="44" width="414" height="818"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="conversationCell" id="KFe-2w-gA4">
+                                        <rect key="frame" x="0.0" y="44.5" width="414" height="43.5"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="KFe-2w-gA4" id="Vzd-qv-UV9">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="gC9-N7-mHs"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="Eko-wf-IRH"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="mCg-eO-WWl" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="3dl-N3-MaS"/>
+                            <constraint firstItem="mCg-eO-WWl" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="9Ue-X8-rLo"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="mCg-eO-WWl" secondAttribute="bottom" id="d9n-mD-SuI"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="mCg-eO-WWl" secondAttribute="trailing" id="j20-2D-lnx"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="mLt-ub-MnL"/>
+                    <connections>
+                        <outlet property="conversationTblView" destination="mCg-eO-WWl" id="ROA-hg-e0p"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="657.97101449275362" y="-135.26785714285714"/>
+        </scene>
+        <!--New Conversation View Controller-->
+        <scene sceneID="tk8-UU-1mP">
+            <objects>
+                <viewController storyboardIdentifier="NewConversationViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BLL-Fh-Gb3" customClass="NewConversationViewController" customModule="RealTimeChat" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="FRe-cg-7jw">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" placeholder="Search for user" translatesAutoresizingMaskIntoConstraints="NO" id="ZZQ-3g-lnk">
+                                <rect key="frame" x="0.0" y="44" width="414" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="7Wm-49-CYU"/>
+                                </constraints>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="BLL-Fh-Gb3" id="uyF-8Q-Mxh"/>
+                                </connections>
+                            </searchBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="eem-aa-bgT">
+                                <rect key="frame" x="0.0" y="94" width="414" height="768"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="newConCell" id="X32-wC-yzc">
+                                        <rect key="frame" x="0.0" y="44.5" width="414" height="43.5"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="X32-wC-yzc" id="AKe-El-T6L">
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="BLL-Fh-Gb3" id="dL9-9l-cns"/>
+                                    <outlet property="delegate" destination="BLL-Fh-Gb3" id="xox-go-QkN"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="L1J-X4-PiH"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="ZZQ-3g-lnk" firstAttribute="top" secondItem="L1J-X4-PiH" secondAttribute="top" id="aiL-tM-gdQ"/>
+                            <constraint firstItem="ZZQ-3g-lnk" firstAttribute="trailing" secondItem="L1J-X4-PiH" secondAttribute="trailing" id="dr0-mo-IGr"/>
+                            <constraint firstItem="L1J-X4-PiH" firstAttribute="bottom" secondItem="eem-aa-bgT" secondAttribute="bottom" id="gfF-dU-I47"/>
+                            <constraint firstItem="eem-aa-bgT" firstAttribute="leading" secondItem="L1J-X4-PiH" secondAttribute="leading" id="gkU-AC-JsG"/>
+                            <constraint firstItem="L1J-X4-PiH" firstAttribute="trailing" secondItem="eem-aa-bgT" secondAttribute="trailing" id="hgq-BN-gKq"/>
+                            <constraint firstItem="eem-aa-bgT" firstAttribute="top" secondItem="ZZQ-3g-lnk" secondAttribute="bottom" id="j9Q-zR-Wts"/>
+                            <constraint firstItem="ZZQ-3g-lnk" firstAttribute="leading" secondItem="L1J-X4-PiH" secondAttribute="leading" id="qZg-eg-fS4"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="newConTblView" destination="eem-aa-bgT" id="SbB-wL-rQA"/>
+                        <outlet property="searchBar" destination="ZZQ-3g-lnk" id="6zk-dY-TMp"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="v2l-Xl-Tg9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1626" y="-135"/>
+        </scene>
+        <!--Chat View Controller-->
+        <scene sceneID="ZET-nU-v8m">
+            <objects>
+                <viewController storyboardIdentifier="ChatViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="JUN-cu-1AX" customClass="ChatViewController" customModule="RealTimeChat" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Ri8-0A-Qza">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="MRW-Qj-eG9"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UVA-fV-UOa" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2468" y="-169"/>
+        </scene>
+    </scenes>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
