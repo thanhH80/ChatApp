@@ -9,5 +9,5 @@ import Foundation
 import UIKit
 
 enum StringContant: String {
-    case dbURL = "https://realtimechatapp-f86fd-default-rtdb.asia-southeast1.firebasedatabase.app"
+    case dbURL = "https://chatapp-70dc2-default-rtdb.asia-southeast1.firebasedatabase.app"
 }

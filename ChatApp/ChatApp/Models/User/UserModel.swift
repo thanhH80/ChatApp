@@ -12,4 +12,7 @@ struct UserModel {
     let lastname: String
     let emailAddress: String
     
+    var profilePicName: String {
+        return "\(String.makeSafe(emailAddress))_profile_picture.png"
+    }
 }
