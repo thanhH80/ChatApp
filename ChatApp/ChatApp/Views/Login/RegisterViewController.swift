@@ -26,11 +26,13 @@ class RegisterViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        navBarHidden = false
-
     }
     
     private func setupUI() {
+        // nav bar
+        navBarHidden = false
+        customNavigationTitleView(title: "Register")
+        
         imagePicker.delegate = self
         firstNameTextField.delegate = self
         lastnameTextField.delegate = self
@@ -70,17 +72,45 @@ class RegisterViewController: BaseViewController {
                          completion: nil)
         }
         
+        showHUD(in: view)
+        
         // Firebase Auth
-        DatabaseManager.shared.checkExistedUser(userEmail: email) { isExisted in
+        DatabaseManager.shared.checkExistedUser(userEmail: email) { [weak self] isExisted in
+            guard let strongSelf = self else { return }
+            
+            strongSelf.dismisHUD()
+            
             if isExisted {
                 print("User existed!")
             } else {
                 FirebaseAuth.Auth.auth().createUser(withEmail: email,
                                                     password: password,
-                                                    completion: { [weak self] authResult, authError in
+                                                    completion: { authResult, authError in
                     if authResult != nil, authError == nil {
-                        DatabaseManager.shared.inserUser(with: UserModel(firstname: firstName, lastname: lastName, emailAddress: email))
-                        self?.displayAlert(customAlertTitle: .confirm,
+                        let user = UserModel(firstname: firstName,
+                                             lastname: lastName,
+                                             emailAddress: email)
+                        DatabaseManager.shared.inserUser(with: user) { sucess in
+                            if sucess {
+                                guard let image = strongSelf.profileImageView.image,
+                                      let data = image.pngData() else {
+                                    return
+                                }
+                                let fileName = user.profilePicName
+                                StorageManager.shared.uploadProfilePicture(with: data,
+                                                                           fileName: fileName) { result in
+                                    switch result {
+                                    case .success(let downloadURL):
+                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        print(downloadURL)
+                                    case .failure(let e):
+                                        print("Got error when upload image \(e)")
+                                    }
+                                }
+                            }
+                        }
+                        
+                        strongSelf.displayAlert(customAlertTitle: .confirm,
                                             customAlertMessage: .other("Sign up success!"),
                                             actions: [
                                                 .init(customAlertButtonTitle: .other("Login"),
@@ -90,7 +120,7 @@ class RegisterViewController: BaseViewController {
                                             style: .alert, completion: nil)
                         
                     } else {
-                        self?.displayAlert(customAlertTitle: .other("Cannot create user!"),
+                        strongSelf.displayAlert(customAlertTitle: .other("Cannot create user!"),
                                            customAlertMessage: .other(authError?.localizedDescription ?? ""),
                                            actions: [.init(customAlertButtonTitle: .ok, handler: nil)],
                                   style: .alert,

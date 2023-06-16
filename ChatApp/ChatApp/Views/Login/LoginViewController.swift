@@ -23,7 +23,7 @@ class LoginViewController: BaseViewController {
         let vc = LoginViewController.instantiate(storyboard: .login)
         return vc
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -62,9 +62,13 @@ class LoginViewController: BaseViewController {
             
             if authResult != nil, authError == nil {
                 let conversationVC = MainTabbarController.create()
-                self?.navigationController?.pushViewController(conversationVC, animated: true)
+                strongSelf.navigationController?.pushViewController(conversationVC, animated: true)
             } else {
-                print(authError?.localizedDescription ?? "")
+                strongSelf.displayAlert(customAlertTitle: .error, customAlertMessage:
+                        .other(authError?.localizedDescription ?? ""),
+                                        actions: [.init(customAlertButtonTitle: .ok)],
+                                        style: .alert,
+                                        completion: nil)
             }
         }
     }
@@ -78,7 +82,7 @@ class LoginViewController: BaseViewController {
         navigationController?.pushViewController(vc, animated: false)
     }
     
-// MARK: - Actions
+    // MARK: - Actions
     @IBAction private func didTapLogin(_ sender: Any) {
         emailTextField.resignFirstResponder()
         passwordTextField.resignFirstResponder()
@@ -94,34 +98,57 @@ class LoginViewController: BaseViewController {
         // Start the sign in flow!
         GIDSignIn.sharedInstance.signIn(withPresenting: self) { [weak self] gresult, error in
             guard let strongSelf = self else { return }
+            
             guard error == nil else {
                 print("Error \(String(describing: error))")
                 return
             }
             
-            guard let user = gresult?.user,
-                  let idToken = user.idToken?.tokenString else { return }
+            guard let gUser = gresult?.user,
+                  let idToken = gUser.idToken?.tokenString else { return }
             
-            guard let userEmail = user.profile?.email,
-                  let firstName = user.profile?.givenName,
-                  let lastName = user.profile?.familyName else {
-                      print("Cannot found user's profile")
-                      return
-                  }
+            guard let userEmail = gUser.profile?.email,
+                  let profileURL = gUser.profile?.imageURL(withDimension: 200) else {
+                print("Cannot found user's profile")
+                return
+            }
+            strongSelf.showHUD(in: strongSelf.view)
             
             // Check user
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
+                strongSelf.dismisHUD()
+                let firstName = gUser.profile?.givenName
+                let lastName = gUser.profile?.familyName
                 if !exist {
-                    DatabaseManager.shared.inserUser(with: UserModel(firstname: firstName,
-                                                                     lastname: lastName,
-                                                                     emailAddress: userEmail))
-                } else {
-                    print("edasdasdasdasdasda")
+                    let user = UserModel(firstname: firstName ?? "No Name",
+                                         lastname: lastName ?? "No Name",
+                                         emailAddress: userEmail)
+                    DatabaseManager.shared.inserUser(with: user) { sucess in
+                        if sucess {
+                            // upload image
+                            URLSession.shared.dataTask(with: profileURL) { data, _ , _ in
+                                guard let data = data else {
+                                    return
+                                }
+                                let fileName = user.profilePicName
+                                StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName) { result in
+                                    switch result {
+                                    case .success(let downloadURL):
+                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        print(downloadURL)
+                                    case .failure(let e):
+                                        print("Got error when upload image \(e)")
+                                    }
+                                }
+                            }.resume()
+                            
+                        }
+                    }
                 }
             }
             
             let credential = GoogleAuthProvider.credential(withIDToken: idToken,
-                                                           accessToken: user.accessToken.tokenString)
+                                                           accessToken: gUser.accessToken.tokenString)
             
             // User signed in
             FirebaseAuth.Auth.auth().signIn(with: credential) { result, error in
@@ -145,7 +172,8 @@ extension LoginViewController: LoginButtonDelegate {
         let fbCredential = FacebookAuthProvider.credential(withAccessToken: token)
         
         let fbRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
-                                                   parameters: ["fields" : "email, name"],
+                                                   parameters: ["fields" :
+                                                                    "email, first_name, last_name, picture.type(large)"],
                                                    tokenString: token,
                                                    version: nil,
                                                    httpMethod: .get)
@@ -155,22 +183,43 @@ extension LoginViewController: LoginButtonDelegate {
                 return
             }
             
-            guard let userName = result["name"] as? String,
-                let userEmail = result["email"] as? String else {
-                 print("Failed to get email from result")
-                 return
+            guard let firstName = result["first_name"] as? String,
+                  let userEmail = result["email"] as? String,
+                  let picture = result["picture"] as? [String: Any],
+                  let data = picture["data"] as? [String: Any],
+                  let pictureURL = data["url"] as? String,
+                  let lastName =  result["last_name"] as? String else {
+                print("Failed to get infor from result")
+                return
             }
-            
-            let nameComponent = userName.components(separatedBy: " ")
-            guard nameComponent.count == 2 else {return}
-            let firstName = nameComponent[0]
-            let lastName = nameComponent[1]
             
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
                 if !exist {
-                    DatabaseManager.shared.inserUser(with: UserModel(firstname: firstName,
-                                                                     lastname: lastName,
-                                                                     emailAddress: userEmail))
+                    let user = UserModel(firstname: firstName,
+                                         lastname: lastName,
+                                         emailAddress: userEmail)
+                    DatabaseManager.shared.inserUser(with: user) { sucess in
+                        if sucess {
+                            guard let url = URL(string: pictureURL) else { return }
+                            // upload image
+                            URLSession.shared.dataTask(with: url) { data, response, error in
+                                guard let data = data else {
+                                    return
+                                }
+                                let fileName = user.profilePicName
+                                StorageManager.shared.uploadProfilePicture(with: data,
+                                                                           fileName: fileName) { result in
+                                    switch result {
+                                    case .success(let downloadURL):
+                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        print(downloadURL)
+                                    case .failure(let e):
+                                        print("Got error when upload image \(e)")
+                                    }
+                                }
+                            }.resume()
+                        }
+                    }
                 }
             }
         }

@@ -19,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         setupRoute()
         FirebaseApp.configure()
+        KeyboardManager.setup()
         
         ApplicationDelegate.shared.application(
             application,

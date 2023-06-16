@@ -26,13 +26,21 @@ extension DatabaseManager {
                 return
             }
             completion(true)
+            
         }
     }
     
-    public func inserUser(with user: UserModel) {
+    public func inserUser(with user: UserModel, completion: @escaping (Bool) -> Void) {
         dbRef.child(String.makeSafe(user.emailAddress)).setValue([
             "first_name": user.firstname,
             "last_name": user.lastname
-        ])
+        ], withCompletionBlock: { error, _ in
+            guard error == nil else {
+                print("Failed to write to DB")
+                completion(false)
+                return
+            }
+            completion(true)
+        })
     }
 }
