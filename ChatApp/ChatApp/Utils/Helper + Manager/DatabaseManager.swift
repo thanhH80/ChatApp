@@ -40,6 +40,49 @@ extension DatabaseManager {
                 completion(false)
                 return
             }
+            
+            /*
+                users = [
+                    [
+                        emai: "userEmail"
+                        name: "userName = firstname + lastname"
+                    ]
+                ]
+             */
+            // insert user collection
+            self.dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
+                if var userCollection = snapshot.value as? [[String:String]] {
+                    let newElement = [
+                        "email" : String.makeSafe(user.emailAddress),
+                        "userName": user.firstname + " " + user.lastname
+                    ]
+                    userCollection.append(newElement)
+                    
+                    self.dbRef.child("users").setValue(userCollection) { error, _ in
+                        guard error == nil else {
+                            completion(false)
+                            return
+                        }
+                        completion(true)
+                    }
+                } else {
+                    let userCollection: [[String:String]] = [
+                        [
+                            "email" : String.makeSafe(user.emailAddress),
+                            "userName": user.firstname + " " + user.lastname
+                        ]
+                    ]
+                    self.dbRef.child("users").setValue(userCollection) { error, _ in
+                        guard error == nil else {
+                            completion(false)
+                            return
+                        }
+                        completion(true)
+                    }
+                }
+                
+            }
+            
             completion(true)
         })
     }

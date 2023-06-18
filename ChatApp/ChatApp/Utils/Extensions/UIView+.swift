@@ -49,6 +49,14 @@ extension UIView {
             self.layer.masksToBounds = newValue
         }
     }
+    
+    var width: CGFloat {
+        return self.frame.width
+    }
+    
+    var height: CGFloat {
+        return self.frame.height
+    }
 }
 
 extension UIView {
