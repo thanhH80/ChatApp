@@ -12,3 +12,7 @@ enum StorageErorr: Error {
     case failedToGetDownloadURL
 }
 
+enum DatabaseError: Error {
+    case failedToGetUser
+}
+

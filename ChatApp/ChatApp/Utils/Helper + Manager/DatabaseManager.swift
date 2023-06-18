@@ -13,6 +13,8 @@ final class DatabaseManager {
     static let shared = DatabaseManager()
     
     private let dbRef = Database.database(url: StringContant.dbURL.rawValue).reference()
+    
+    public typealias UserCollection = [[String:String]]
 }
 
 // MARK: - Account Manager
@@ -40,7 +42,6 @@ extension DatabaseManager {
                 completion(false)
                 return
             }
-            
             /*
                 users = [
                     [
@@ -51,7 +52,7 @@ extension DatabaseManager {
              */
             // insert user collection
             self.dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
-                if var userCollection = snapshot.value as? [[String:String]] {
+                if var userCollection = snapshot.value as? UserCollection {
                     let newElement = [
                         "email" : String.makeSafe(user.emailAddress),
                         "userName": user.firstname + " " + user.lastname
@@ -66,7 +67,7 @@ extension DatabaseManager {
                         completion(true)
                     }
                 } else {
-                    let userCollection: [[String:String]] = [
+                    let userCollection: UserCollection = [
                         [
                             "email" : String.makeSafe(user.emailAddress),
                             "userName": user.firstname + " " + user.lastname
@@ -80,10 +81,17 @@ extension DatabaseManager {
                         completion(true)
                     }
                 }
-                
             }
-            
-            completion(true)
         })
+    }
+    
+    public func getAllUser(with completion: @escaping (Result<UserCollection, DatabaseError>) -> Void ) {
+        dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
+            guard let userCollection = snapshot.value as? UserCollection else {
+                completion(.failure(.failedToGetUser))
+                return
+            }
+            completion(.success(userCollection))
+        }
     }
 }
