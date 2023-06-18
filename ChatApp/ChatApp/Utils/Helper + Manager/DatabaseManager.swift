@@ -13,6 +13,8 @@ final class DatabaseManager {
     static let shared = DatabaseManager()
     
     private let dbRef = Database.database(url: StringContant.dbURL.rawValue).reference()
+    
+    public typealias UserCollection = [[String:String]]
 }
 
 // MARK: - Account Manager
@@ -40,7 +42,56 @@ extension DatabaseManager {
                 completion(false)
                 return
             }
-            completion(true)
+            /*
+                users = [
+                    [
+                        emai: "userEmail"
+                        name: "userName = firstname + lastname"
+                    ]
+                ]
+             */
+            // insert user collection
+            self.dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
+                if var userCollection = snapshot.value as? UserCollection {
+                    let newElement = [
+                        "email" : String.makeSafe(user.emailAddress),
+                        "userName": user.firstname + " " + user.lastname
+                    ]
+                    userCollection.append(newElement)
+                    
+                    self.dbRef.child("users").setValue(userCollection) { error, _ in
+                        guard error == nil else {
+                            completion(false)
+                            return
+                        }
+                        completion(true)
+                    }
+                } else {
+                    let userCollection: UserCollection = [
+                        [
+                            "email" : String.makeSafe(user.emailAddress),
+                            "userName": user.firstname + " " + user.lastname
+                        ]
+                    ]
+                    self.dbRef.child("users").setValue(userCollection) { error, _ in
+                        guard error == nil else {
+                            completion(false)
+                            return
+                        }
+                        completion(true)
+                    }
+                }
+            }
         })
+    }
+    
+    public func getAllUser(with completion: @escaping (Result<UserCollection, DatabaseError>) -> Void ) {
+        dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
+            guard let userCollection = snapshot.value as? UserCollection else {
+                completion(.failure(.failedToGetUser))
+                return
+            }
+            completion(.success(userCollection))
+        }
     }
 }

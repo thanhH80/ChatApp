@@ -50,13 +50,16 @@ class LoginViewController: BaseViewController {
     }
     
     private func checkInfor() {
-        let email = emailTextField.string
+        let userEmail = emailTextField.string
         let password = passwordTextField.string
+        
+        UserDefaults.standard.set(userEmail, forKey: "email")
+        
         alertUser()
         
         showHUD(in: view)
         
-        FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, authError in
+        FirebaseAuth.Auth.auth().signIn(withEmail: userEmail, password: password) { [weak self] authResult, authError in
             guard let strongSelf = self else { return }
             strongSelf.dismisHUD()
             
@@ -112,6 +115,7 @@ class LoginViewController: BaseViewController {
                 print("Cannot found user's profile")
                 return
             }
+            UserDefaults.standard.set(userEmail, forKey: "email")
             strongSelf.showHUD(in: strongSelf.view)
             
             // Check user
@@ -192,6 +196,7 @@ extension LoginViewController: LoginButtonDelegate {
                 print("Failed to get infor from result")
                 return
             }
+            UserDefaults.standard.set(userEmail, forKey: "email")
             
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
                 if !exist {

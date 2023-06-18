@@ -13,6 +13,6 @@ struct UserModel {
     let emailAddress: String
     
     var profilePicName: String {
-        return "\(String.makeSafe(emailAddress))_profile_picture.png"
+        return "\(String.makeSafe(emailAddress))\(StringContant.avatarSuffix.rawValue)"
     }
 }
