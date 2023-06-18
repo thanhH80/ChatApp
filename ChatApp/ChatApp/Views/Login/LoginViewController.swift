@@ -124,8 +124,8 @@ class LoginViewController: BaseViewController {
                 let firstName = gUser.profile?.givenName
                 let lastName = gUser.profile?.familyName
                 if !exist {
-                    let user = UserModel(firstname: firstName ?? "No Name",
-                                         lastname: lastName ?? "No Name",
+                    let user = UserModel(firstname: firstName ?? " ",
+                                         lastname: lastName ?? " ",
                                          emailAddress: userEmail)
                     DatabaseManager.shared.inserUser(with: user) { sucess in
                         if sucess {
@@ -187,12 +187,12 @@ extension LoginViewController: LoginButtonDelegate {
                 return
             }
             
-            guard let firstName = result["first_name"] as? String,
-                  let userEmail = result["email"] as? String,
-                  let picture = result["picture"] as? [String: Any],
-                  let data = picture["data"] as? [String: Any],
-                  let pictureURL = data["url"] as? String,
-                  let lastName =  result["last_name"] as? String else {
+            guard let firstName = result[UserResponse.firstName.dto] as? String,
+                  let userEmail = result[UserResponse.email.dto] as? String,
+                  let picture = result[DataResponse.picture.dto] as? [String: Any],
+                  let data = picture[DataResponse.data.dto] as? [String: Any],
+                  let pictureURL = data[DataResponse.url.dto] as? String,
+                  let lastName =  result[UserResponse.lastName.dto] as? String else {
                 print("Failed to get infor from result")
                 return
             }

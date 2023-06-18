@@ -67,7 +67,7 @@ extension NewConversationViewController: UISearchBarDelegate {
         guard hasFetched else { return }
         dismisHUD()
         let result = users.filter({
-            guard let userName = $0["userName"]?.lowercased() else {
+            guard let userName = $0[UserResponse.userName.dto]?.lowercased() else {
                 return false
             }
             return userName.contains(query.lowercased())
@@ -107,7 +107,7 @@ extension NewConversationViewController: UITableViewDataSource {
         if userResult.isEmpty {
             cell.textLabel?.text = "No user found"
         } else {
-            cell.textLabel?.text = userResult[indexPath.row]["userName"]
+            cell.textLabel?.text = userResult[indexPath.row][UserResponse.userName.dto]
         }
         
         return cell

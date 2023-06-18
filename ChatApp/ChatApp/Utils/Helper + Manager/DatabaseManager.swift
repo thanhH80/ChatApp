@@ -34,8 +34,8 @@ extension DatabaseManager {
     
     public func inserUser(with user: UserModel, completion: @escaping (Bool) -> Void) {
         dbRef.child(String.makeSafe(user.emailAddress)).setValue([
-            "first_name": user.firstname,
-            "last_name": user.lastname
+            UserResponse.firstName.dto: user.firstname,
+            UserResponse.lastName.dto: user.lastname
         ], withCompletionBlock: { error, _ in
             guard error == nil else {
                 print("Failed to write to DB")
@@ -51,15 +51,15 @@ extension DatabaseManager {
                 ]
              */
             // insert user collection
-            self.dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
+            self.dbRef.child(DatabasePath.users.dto).observeSingleEvent(of: .value) { snapshot in
                 if var userCollection = snapshot.value as? UserCollection {
                     let newElement = [
-                        "email" : String.makeSafe(user.emailAddress),
-                        "userName": user.firstname + " " + user.lastname
+                        UserResponse.email.dto : String.makeSafe(user.emailAddress),
+                        UserResponse.userName.dto: user.firstname + " " + user.lastname
                     ]
                     userCollection.append(newElement)
                     
-                    self.dbRef.child("users").setValue(userCollection) { error, _ in
+                    self.dbRef.child(DatabasePath.users.dto).setValue(userCollection) { error, _ in
                         guard error == nil else {
                             completion(false)
                             return
@@ -69,11 +69,11 @@ extension DatabaseManager {
                 } else {
                     let userCollection: UserCollection = [
                         [
-                            "email" : String.makeSafe(user.emailAddress),
-                            "userName": user.firstname + " " + user.lastname
+                            UserResponse.email.dto : String.makeSafe(user.emailAddress),
+                            UserResponse.userName.dto: user.firstname + " " + user.lastname
                         ]
                     ]
-                    self.dbRef.child("users").setValue(userCollection) { error, _ in
+                    self.dbRef.child(DatabasePath.users.dto).setValue(userCollection) { error, _ in
                         guard error == nil else {
                             completion(false)
                             return
@@ -86,7 +86,7 @@ extension DatabaseManager {
     }
     
     public func getAllUser(with completion: @escaping (Result<UserCollection, DatabaseError>) -> Void ) {
-        dbRef.child("users").observeSingleEvent(of: .value) { snapshot in
+        dbRef.child(DatabasePath.users.dto).observeSingleEvent(of: .value) { snapshot in
             guard let userCollection = snapshot.value as? UserCollection else {
                 completion(.failure(.failedToGetUser))
                 return
