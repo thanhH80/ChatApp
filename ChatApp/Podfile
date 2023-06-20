@@ -12,9 +12,11 @@ inhibit_all_warnings!
 target 'ChatApp' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
-
+  
+  #Ultils
   pod 'MessageKit'
   pod 'SDWebImage'
+  pod 'SwiftDate'
   
   #UI
   pod 'IQKeyboardManager'

@@ -38,8 +38,25 @@ class ConversationViewController: BaseViewController {
     
     @objc private func didTapSearch() {
         let newConVC = NewConversationViewController.create()
+        newConVC.completion = { [weak self] userResult in
+            print("\(userResult)")
+            self?.createNewConversation(result: userResult)
+        }
         let navC = BaseNavigationController(rootViewController: newConVC)
         present(navC, animated: true, completion: nil)
+    }
+    
+    private func createNewConversation(result: [String: String]) {
+        guard let userName = result[UserResponse.userName.dto],
+              let email = result[UserResponse.email.dto] else {
+            print("Cannot get user's name and email")
+            return
+        }
+        
+        let messVC = ChatViewController.create(with: email)
+        messVC.title = userName
+        messVC.isNewConversation = true
+        navigationController?.pushViewController(messVC, animated: true)
     }
     
     private func checkUserLoggedIn() {
@@ -53,7 +70,7 @@ class ConversationViewController: BaseViewController {
 extension ConversationViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
-        let messVC = ChatViewController.create()
+        let messVC = ChatViewController.create(with: "test@gmail.com")
         messVC.title = "Thagion"
         navigationController?.pushViewController(messVC, animated: true)
     }

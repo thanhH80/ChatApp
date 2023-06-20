@@ -14,4 +14,8 @@ extension String {
         safeString = safeString.replacingOccurrences(of: ".", with: "-")
         return safeString
     }
+    
+    func removeSpace() -> String {
+        return self.replacingOccurrences(of: " ", with: "")
+    }
 }

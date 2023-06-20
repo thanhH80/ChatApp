@@ -53,7 +53,7 @@ class LoginViewController: BaseViewController {
         let userEmail = emailTextField.string
         let password = passwordTextField.string
         
-        UserDefaults.standard.set(userEmail, forKey: "email")
+        UserDefaults.standard.userEmail = userEmail
         
         alertUser()
         
@@ -115,7 +115,7 @@ class LoginViewController: BaseViewController {
                 print("Cannot found user's profile")
                 return
             }
-            UserDefaults.standard.set(userEmail, forKey: "email")
+            UserDefaults.standard.userEmail = userEmail
             strongSelf.showHUD(in: strongSelf.view)
             
             // Check user
@@ -138,7 +138,7 @@ class LoginViewController: BaseViewController {
                                 StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName) { result in
                                     switch result {
                                     case .success(let downloadURL):
-                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        UserDefaults.standard.profilePictureURL = downloadURL
                                         print(downloadURL)
                                     case .failure(let e):
                                         print("Got error when upload image \(e)")
@@ -196,7 +196,7 @@ extension LoginViewController: LoginButtonDelegate {
                 print("Failed to get infor from result")
                 return
             }
-            UserDefaults.standard.set(userEmail, forKey: "email")
+            UserDefaults.standard.userEmail = userEmail
             
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
                 if !exist {
@@ -216,7 +216,7 @@ extension LoginViewController: LoginButtonDelegate {
                                                                            fileName: fileName) { result in
                                     switch result {
                                     case .success(let downloadURL):
-                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        UserDefaults.standard.profilePictureURL = downloadURL
                                         print(downloadURL)
                                     case .failure(let e):
                                         print("Got error when upload image \(e)")

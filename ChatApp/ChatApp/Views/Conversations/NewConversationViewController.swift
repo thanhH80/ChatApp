@@ -15,6 +15,7 @@ class NewConversationViewController: BaseViewController {
     private var userResult = DatabaseManager.UserCollection()
     private var users = DatabaseManager.UserCollection()
     private var hasFetched = false
+    public var completion: (([String: String]) -> (Void))?
     
     class func create() -> NewConversationViewController {
         let vc = NewConversationViewController.instantiate(storyboard: .conversation)
@@ -94,6 +95,10 @@ extension NewConversationViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         // start a conversation
+        let foudUser = userResult[indexPath.row]
+        dismiss(animated: true) { [weak self] in
+            self?.completion?(foudUser)
+        }
     }
 }
 

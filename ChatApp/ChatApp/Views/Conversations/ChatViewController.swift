@@ -7,14 +7,24 @@
 
 import UIKit
 import MessageKit
+import InputBarAccessoryView
+import SwiftDate
 
 class ChatViewController: MessagesViewController {
     
-    private let sampleSender = Sender(senderId: "1", displayName: "ThagionHS", photoURL: "")
+    private var sampleSender: Sender? {
+        let email = UserDefaults.standard.userEmail
+        return Sender(senderId: email ,
+                      displayName: "ThagionHS",
+                      photoURL: "")
+    }
     private var messages = [MessageModel]()
+    private var otherUserEmail: String = ""
+    public var isNewConversation = false
 
-    class func create() -> ChatViewController {
+    class func create(with otherUserEmail: String) -> ChatViewController {
         let vc = ChatViewController.instantiate(storyboard: .conversation)
+        vc.otherUserEmail = otherUserEmail
         return vc
     }
 
@@ -23,17 +33,13 @@ class ChatViewController: MessagesViewController {
         setupUI()
         getAllMessages()
     }
-
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        messageInputBar.inputTextView.becomeFirstResponder()
+    }
+    
     private func getAllMessages() {
-        messages.append(MessageModel(sender: sampleSender,
-                                     messageId: "1",
-                                     sentDate: Date(),
-                                     kind: .text("This is test messages!")))
-
-        messages.append(MessageModel(sender: sampleSender,
-                                     messageId: "2",
-                                     sentDate: Date(),
-                                     kind: .text("This is test messages!, This is test messages!  This is test messages! This is test messages!")))
     }
 
     private func setupUI() {
@@ -43,12 +49,55 @@ class ChatViewController: MessagesViewController {
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
         messagesCollectionView.messagesDataSource = self
+        messageInputBar.delegate = self
     }
 }
 
+// MARK: -
+extension ChatViewController: InputBarAccessoryViewDelegate {
+    func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
+        guard !text.removeSpace().isEmpty,
+              let sender = sampleSender,
+              let messageID = createMessageID() else { return }
+    
+        print("Sending message: =>>> \(text)")
+        
+        // Send message
+        if isNewConversation {
+            // create new in db
+            let newMessage = MessageModel(sender: sender,
+                                          messageId: messageID,
+                                          sentDate: Date(),
+                                          kind: .text(text))
+            DatabaseManager.shared.createNewConversation(with: otherUserEmail, firstMessage: newMessage) { susscess in
+                if susscess {
+                    print("Sendding mess \(susscess)")
+                } else {
+                    print("Cannot sendding mess")
+                }
+            }
+        } else {
+            // append to existing one
+        }
+    }
+    
+    /// Create messageID with date, otherUserEmai, senderEmail. randomInt
+    private func createMessageID() -> String? {
+        let dateString = Date().toLocalTime().toFormat(dateAndTimeFormat)
+        let currentUserEmail = UserDefaults.standard.userEmail
+        let messID = "\(otherUserEmail)_\(String.makeSafe(currentUserEmail))_\(dateString)"
+        print("Mess ID: \(messID)")
+        return messID
+    }
+}
+
+// MARK: - Messages
 extension ChatViewController: MessagesDataSource {
     func currentSender() -> SenderType {
-        return sampleSender
+        if let sender = sampleSender {
+            return sender
+        }
+        return Sender(senderId: "", displayName: "", photoURL: "")
     }
 
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {
@@ -62,10 +111,7 @@ extension ChatViewController: MessagesDataSource {
 
 }
 
-extension ChatViewController: MessagesDisplayDelegate {
+extension ChatViewController: MessagesDisplayDelegate {}
 
-}
+extension ChatViewController: MessagesLayoutDelegate {}
 
-extension ChatViewController: MessagesLayoutDelegate {
-
-}

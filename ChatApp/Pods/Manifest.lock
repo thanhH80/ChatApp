@@ -78,6 +78,7 @@ PODS:
   - SDWebImage (5.15.8):
     - SDWebImage/Core (= 5.15.8)
   - SDWebImage/Core (5.15.8)
+  - SwiftDate (7.0.0)
 
 DEPENDENCIES:
   - FBSDKLoginKit (= 12.0.2)
@@ -90,6 +91,7 @@ DEPENDENCIES:
   - MessageKit
   - RealmSwift (= 10.38.3)
   - SDWebImage
+  - SwiftDate
 
 SPEC REPOS:
   trunk:
@@ -119,6 +121,7 @@ SPEC REPOS:
     - Realm
     - RealmSwift
     - SDWebImage
+    - SwiftDate
 
 SPEC CHECKSUMS:
   AppAuth: 3bb1d1cd9340bd09f5ed189fb00b1cc28e1e8570
@@ -147,7 +150,8 @@ SPEC CHECKSUMS:
   Realm: 0bdb75abc37a5b80e814bf28268ecdd7c6a92d41
   RealmSwift: 9340d46aa1e711bce2cf70bd370ac3c48a9c6795
   SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798
+  SwiftDate: bbc26e26fc8c0c33fbee8c140c5e8a68293a148a
 
-PODFILE CHECKSUM: c231130c7b827a90742f887040d0f6faa09dab3e
+PODFILE CHECKSUM: 68a74e60b1ea8251698b53f1934161de3271f3de
 
 COCOAPODS: 1.11.3

@@ -101,7 +101,7 @@ class RegisterViewController: BaseViewController {
                                                                            fileName: fileName) { result in
                                     switch result {
                                     case .success(let downloadURL):
-                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        UserDefaults.standard.profilePictureURL = downloadURL
                                         print(downloadURL)
                                     case .failure(let e):
                                         print("Got error when upload image \(e)")
