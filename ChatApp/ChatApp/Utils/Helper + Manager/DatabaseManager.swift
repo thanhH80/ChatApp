@@ -112,31 +112,7 @@ extension DatabaseManager {
             
             let sentDate = firstMessage.sentDate.toLocalTime()
             let sentDateString = sentDate.toFormat(dateAndTimeFormat)
-            var message = ""
-            
-            switch firstMessage.kind {
-            case .text(let newMessage):
-                message = newMessage
-            case .attributedText(_):
-                break
-            case .photo(_):
-                break
-            case .video(_):
-                break
-            case .location(_):
-                break
-            case .emoji(_):
-                break
-            case .audio(_):
-                break
-            case .contact(_):
-                break
-            case .linkPreview(_):
-                break
-            case .custom(_):
-                break
-            }
-            
+            let message = firstMessage.kind.text
             let conversationID = "\(ConversationResponse.conversations.string)_\(firstMessage.messageId)"
             
             let newConversation: [String: Any] = [
@@ -176,30 +152,7 @@ extension DatabaseManager {
     
     private func finishCreateConversation(with conversationID: String, firstMessage: MessageModel, completion: @escaping (Bool) ->Void) {
         
-        var message = firstMessage.kind.text
-//        switch firstMessage.kind {
-//        case .text(let newMessage):
-//            message = newMessage
-//        case .attributedText(_):
-//            break
-//        case .photo(_):
-//            break
-//        case .video(_):
-//            break
-//        case .location(_):
-//            break
-//        case .emoji(_):
-//            break
-//        case .audio(_):
-//            break
-//        case .contact(_):
-//            break
-//        case .linkPreview(_):
-//            break
-//        case .custom(_):
-//            break
-//        }
-        
+        let message = firstMessage.kind.text
         let sentDate = firstMessage.sentDate.toLocalTime()
         let sentDateString = sentDate.toFormat(dateAndTimeFormat)
         

@@ -70,11 +70,6 @@ PODS:
   - MessageKit (3.8.0):
     - InputBarAccessoryView (~> 5.5.0)
   - PromisesObjC (2.2.0)
-  - Realm (10.38.3):
-    - Realm/Headers (= 10.38.3)
-  - Realm/Headers (10.38.3)
-  - RealmSwift (10.38.3):
-    - Realm (= 10.38.3)
   - SDWebImage (5.15.8):
     - SDWebImage/Core (= 5.15.8)
   - SDWebImage/Core (5.15.8)
@@ -89,7 +84,6 @@ DEPENDENCIES:
   - IQKeyboardManager
   - JGProgressHUD
   - MessageKit
-  - RealmSwift (= 10.38.3)
   - SDWebImage
   - SwiftDate
 
@@ -118,8 +112,6 @@ SPEC REPOS:
     - leveldb-library
     - MessageKit
     - PromisesObjC
-    - Realm
-    - RealmSwift
     - SDWebImage
     - SwiftDate
 
@@ -147,11 +139,9 @@ SPEC CHECKSUMS:
   leveldb-library: f03246171cce0484482ec291f88b6d563699ee06
   MessageKit: a1ba0c69ebead94029867853eb44dd05b9b3f453
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
-  Realm: 0bdb75abc37a5b80e814bf28268ecdd7c6a92d41
-  RealmSwift: 9340d46aa1e711bce2cf70bd370ac3c48a9c6795
   SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798
   SwiftDate: bbc26e26fc8c0c33fbee8c140c5e8a68293a148a
 
-PODFILE CHECKSUM: 68a74e60b1ea8251698b53f1934161de3271f3de
+PODFILE CHECKSUM: 71c19fdd27c4f067ba7880b760a4f0fc264a7089
 
 COCOAPODS: 1.11.3
