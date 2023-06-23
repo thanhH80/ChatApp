@@ -24,6 +24,15 @@ extension UserDefaults {
     private enum UserInfor: String {
         case userEmail
         case profilePictureURL
+        case userName
+    }
+    
+    var userName: String {
+        get {
+            string(forKey: UserInfor.userName.rawValue) ?? ""
+        } set {
+            setValue(newValue, forKey: UserInfor.userName.rawValue)
+        }
     }
     
     var userEmail: String {

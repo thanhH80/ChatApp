@@ -124,16 +124,18 @@ class LoginViewController: BaseViewController {
                 let firstName = gUser.profile?.givenName
                 let lastName = gUser.profile?.familyName
                 if !exist {
-                    let user = UserModel(firstname: firstName ?? " ",
-                                         lastname: lastName ?? " ",
+                    let user = UserModel(firstname: firstName ?? "",
+                                         lastname: lastName ?? "",
                                          emailAddress: userEmail)
                     DatabaseManager.shared.inserUser(with: user) { sucess in
                         if sucess {
                             // upload image
+                            UserDefaults.standard.userName = "\(firstName ?? "") \(lastName ?? "")"
                             URLSession.shared.dataTask(with: profileURL) { data, _ , _ in
                                 guard let data = data else {
                                     return
                                 }
+                                
                                 let fileName = user.profilePicName
                                 StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName) { result in
                                     switch result {
@@ -196,7 +198,9 @@ extension LoginViewController: LoginButtonDelegate {
                 print("Failed to get infor from result")
                 return
             }
+            // Cached user's infor
             UserDefaults.standard.userEmail = userEmail
+           
             
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
                 if !exist {
@@ -207,6 +211,7 @@ extension LoginViewController: LoginButtonDelegate {
                         if sucess {
                             guard let url = URL(string: pictureURL) else { return }
                             // upload image
+                            UserDefaults.standard.userName = "\(firstName) \(lastName)"
                             URLSession.shared.dataTask(with: url) { data, response, error in
                                 guard let data = data else {
                                     return

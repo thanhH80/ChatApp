@@ -14,6 +14,7 @@ enum MessageResponse {
     case content
     case date
     case senderEmail
+    case name
     case isRead
     
     var string: String {
@@ -30,6 +31,8 @@ enum MessageResponse {
             return "date"
         case .senderEmail:
             return "sender_emal"
+        case .name:
+            return "name"
         case .isRead:
             return "is_read"
         }

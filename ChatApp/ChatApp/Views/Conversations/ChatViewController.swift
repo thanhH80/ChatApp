@@ -19,12 +19,14 @@ class ChatViewController: MessagesViewController {
                       photoURL: "")
     }
     private var messages = [MessageModel]()
-    private var otherUserEmail: String = ""
+    private var reciverEmail: String = ""
+    private var id: String?
     public var isNewConversation = false
 
-    class func create(with otherUserEmail: String) -> ChatViewController {
+    class func create(with otherUserEmail: String, id: String) -> ChatViewController {
         let vc = ChatViewController.instantiate(storyboard: .conversation)
-        vc.otherUserEmail = otherUserEmail
+        vc.reciverEmail = otherUserEmail
+        vc.id = id
         return vc
     }
 
@@ -40,6 +42,21 @@ class ChatViewController: MessagesViewController {
     }
     
     private func getAllMessages() {
+        DatabaseManager.shared.getAllMessageForConversation(with: id ?? "") { [weak self] result in
+            switch result {
+            case .success(let messages):
+                guard !messages.isEmpty else {
+                    print("Not found any message")
+                    return
+                }
+                self?.messages = messages
+                DispatchQueue.main.async {
+                    self?.messagesCollectionView.reloadData()
+                }
+            case .failure(let error):
+                print("Got error when get all mess from ChatVC: \(error)")
+            }
+        }
     }
 
     private func setupUI() {
@@ -69,7 +86,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
                                           messageId: messageID,
                                           sentDate: Date(),
                                           kind: .text(text))
-            DatabaseManager.shared.createNewConversation(with: otherUserEmail, firstMessage: newMessage) { susscess in
+            DatabaseManager.shared.createNewConversation(with: reciverEmail, firstMessage: newMessage, reciverName: self.title ?? "User") { susscess in
                 if susscess {
                     print("Sendding mess \(susscess)")
                 } else {
@@ -85,8 +102,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
     private func createMessageID() -> String? {
         let dateString = Date().toLocalTime().toFormat(dateAndTimeFormat)
         let currentUserEmail = UserDefaults.standard.userEmail
-        let messID = "\(otherUserEmail)_\(String.makeSafe(currentUserEmail))_\(dateString)"
-        print("Mess ID: \(messID)")
+        let messID = "\(reciverEmail)_\(String.makeSafe(currentUserEmail))_\(dateString)"
         return messID
     }
 }
@@ -97,7 +113,7 @@ extension ChatViewController: MessagesDataSource {
         if let sender = sampleSender {
             return sender
         }
-        return Sender(senderId: "", displayName: "", photoURL: "")
+        fatalError("Email nil")
     }
 
     func messageForItem(at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> MessageType {

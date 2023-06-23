@@ -96,6 +96,7 @@ class RegisterViewController: BaseViewController {
                                       let data = image.pngData() else {
                                     return
                                 }
+                                UserDefaults.standard.userName = "\(firstName) \(lastName)"
                                 let fileName = user.profilePicName
                                 StorageManager.shared.uploadProfilePicture(with: data,
                                                                            fileName: fileName) { result in

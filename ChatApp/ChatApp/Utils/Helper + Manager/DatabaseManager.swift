@@ -95,13 +95,17 @@ extension DatabaseManager {
 
 extension DatabaseManager {
     /// Create a new conversation with target user and first message sent
-    public func createNewConversation(with otherUserEmail: String, firstMessage: MessageModel, completion: @escaping (Bool) -> Void ) {
+    public func createNewConversation(with reciverEmail: String,
+                                      firstMessage: MessageModel,
+                                      reciverName: String,
+                                      completion: @escaping (Bool) -> Void ) {
         
         let userEmail = UserDefaults.standard.userEmail
+        let userSenderName = UserDefaults.standard.userName
         let safeUserEmail = String.makeSafe(userEmail)
-        let userRef = dbRef.child(safeUserEmail)
+        let userRef = dbRef.child("\(safeUserEmail)")
+        
         userRef.observeSingleEvent(of: .value) { [weak self] snapshot in
-            
             guard let strongSelf = self else { return }
             
             guard var userNode = snapshot.value as? [String: Any] else {
@@ -117,13 +121,40 @@ extension DatabaseManager {
             
             let newConversation: [String: Any] = [
                 ConversationResponse.id.string: conversationID,
-                ConversationResponse.otherUserEmail.string: otherUserEmail,
+                ConversationResponse.otherEmail.string: reciverEmail,
+                ConversationResponse.name.string: reciverName,
                 ConversationResponse.lastestMessage.string : [
                     ConversationResponse.date.string: sentDateString,
                     ConversationResponse.content.string: message,
                     ConversationResponse.isRead.string: false
                 ]
             ]
+            
+            let reciverConversation: [String: Any] = [
+                ConversationResponse.id.string: conversationID,
+                ConversationResponse.otherEmail.string: safeUserEmail,
+                ConversationResponse.name.string: userSenderName,
+                ConversationResponse.lastestMessage.string : [
+                    ConversationResponse.date.string: sentDateString,
+                    ConversationResponse.content.string: message,
+                    ConversationResponse.isRead.string: false
+                ]
+            ]
+            
+            //UPdate revicer conversation
+            strongSelf.dbRef.child("\(reciverEmail)/\(ConversationResponse.conversations.string)")
+                .observeSingleEvent(of: .value) { snapshot in
+                    if var reciverConversations = snapshot.value as? [[String: Any]] {
+                        reciverConversations.append(reciverConversation)
+                        strongSelf.dbRef.child("\(reciverEmail)/\(ConversationResponse.conversations.string)")
+                            .setValue(reciverConversations)
+                    } else {
+                        strongSelf.dbRef.child("\(reciverEmail)/\(ConversationResponse.conversations.string)")
+                            .setValue([reciverConversation])
+                    }
+                    
+                }
+            
             
             // if a conversation exists, append a new comversation
             if var conversations = userNode[ConversationResponse.conversations.string] as? [[String: Any]] {
@@ -135,7 +166,7 @@ extension DatabaseManager {
                         completion(false)
                         return
                     }
-                    strongSelf.finishCreateConversation(with: conversationID, firstMessage: firstMessage, completion: completion)
+                    strongSelf.finishCreateConversation(with: conversationID, senderName: reciverName, firstMessage: firstMessage, completion: completion)
                 }
             } else {
                 userNode[ConversationResponse.conversations.string] = [newConversation]
@@ -144,13 +175,13 @@ extension DatabaseManager {
                         completion(false)
                         return
                     }
-                    strongSelf.finishCreateConversation(with: conversationID, firstMessage: firstMessage, completion: completion)
+                    strongSelf.finishCreateConversation(with: conversationID, senderName: reciverName, firstMessage: firstMessage, completion: completion)
                 }
             }
         }
     }
     
-    private func finishCreateConversation(with conversationID: String, firstMessage: MessageModel, completion: @escaping (Bool) ->Void) {
+    private func finishCreateConversation(with conversationID: String, senderName: String, firstMessage: MessageModel, completion: @escaping (Bool) ->Void) {
         
         let message = firstMessage.kind.text
         let sentDate = firstMessage.sentDate.toLocalTime()
@@ -164,6 +195,7 @@ extension DatabaseManager {
             MessageResponse.content.string: message,
             MessageResponse.date.string: sentDateString,
             MessageResponse.senderEmail.string: UserDefaults.standard.userEmail,
+            MessageResponse.name.string: senderName,
             MessageResponse.isRead.string: false
         ]
         
@@ -184,15 +216,58 @@ extension DatabaseManager {
     }
     
     /// Get all conversation for passed email
-    public func getAllConversation(for email: String, completion: @escaping (Result<String, Error>) -> Void) {
-        
+    public func getAllConversation(for email: String, completion: @escaping (Result<[ConversationModel], DatabaseError>) -> Void) {
+        dbRef.child("\(email)/\(ConversationResponse.conversations.string)").observe(.value) { snapshot in
+            guard let conversationValue = snapshot.value as? [[String: Any]] else {
+                completion(.failure(.failedToGetConversations))
+                return
+            }
+            let conversations: [ConversationModel] = conversationValue.compactMap { dictionary in
+                guard let conversationID = dictionary[ConversationResponse.id.string] as? String,
+                      let name = dictionary[ConversationResponse.name.string] as? String,
+                      let reciverEmail = dictionary[ConversationResponse.otherEmail.string] as? String,
+                      let lastestMessage = dictionary[ConversationResponse.lastestMessage.string] as? [String: Any],
+                      let sentDate = lastestMessage[MessageResponse.date.string] as? String,
+                      let isReadMess = lastestMessage[MessageResponse.isRead.string] as? Bool,
+                      let content = lastestMessage[MessageResponse.content.string] as? String else {
+                    return nil
+                }
+                
+                let lastestMessObject = LatestMessage(date: sentDate, text: content, isRead: isReadMess)
+                
+                return ConversationModel(id: conversationID,
+                                         name: name,
+                                         ohterUserEmail: reciverEmail,
+                                         lastestMessage: lastestMessObject)
+            }
+            completion(.success(conversations))
+        }
     }
     
     /// Get all message from conversation with passed ID
-    public func getAllMessageForConversation(with id: String, completion: @escaping (Result<String, Error>) -> Void) {
-        
+    public func getAllMessageForConversation(with id: String, completion: @escaping (Result<[MessageModel], DatabaseError>) -> Void) {
+        dbRef.child("\(id)/message").observe(.value) { snapshot in
+            guard let messageVale = snapshot.value as? [[String: Any]] else {
+                completion(.failure(.failedToGetMessages))
+                return
+            }
+            let messages: [MessageModel] = messageVale.compactMap { dictionary in
+                guard let messageID = dictionary[MessageResponse.id.string] as? String,
+                      let reciverName = dictionary[MessageResponse.name.string] as? String,
+                      let senderEmail = dictionary[MessageResponse.senderEmail.string] as? String,
+                      let dateString = dictionary[MessageResponse.date.string] as? String,
+                      let sentDate = dateString.toDate(withFormat: dateAndTimeFormat),
+//                      let isReadMess = dictionary[MessageResponse.isRead.string] as? Bool,
+//                      let messTpye = dictionary[MessageResponse.type.string] as? String,
+                      let content = dictionary[MessageResponse.content.string] as? String else {
+                    return nil
+                }
+                let sender = Sender(senderId: senderEmail, displayName: reciverName, photoURL: "")
+                return MessageModel(sender: sender, messageId: messageID, sentDate: sentDate, kind: .text(content))
+            }
+            completion(.success(messages))
+        }
     }
-    
     /// Send a message to conversation
     public func sendMessage(to conversation: String, message: MessageModel, completion: @escaping (Bool) -> Void ) {
         

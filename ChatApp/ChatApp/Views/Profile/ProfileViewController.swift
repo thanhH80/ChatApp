@@ -60,6 +60,7 @@ class ProfileViewController: BaseViewController {
         StorageManager.shared.fetchDownloadURL(for: path) { [weak self] result in
             switch result {
             case .success(let url):
+                print("Downloaded profile picture")
                 self?.downloadImage(imageView: self?.profilePictureImageView ?? UIImageView(), url: url)
             case .failure(let error):
                 print("Got error when fetch download url: \(error)")
