@@ -64,6 +64,20 @@ class LoginViewController: BaseViewController {
             strongSelf.dismisHUD()
             
             if authResult != nil, authError == nil {
+                DatabaseManager.shared.getDataFromPath(path: String.makeSafe(userEmail)) { result in
+                    switch result {
+                    case .success(let data):
+                        guard let userData = data as? [String: Any],
+                              let firstName = userData[UserResponse.firstName.dto] as? String,
+                              let lastName = userData[UserResponse.lastName.dto] as? String else {
+                            return
+                        }
+                        UserDefaults.standard.userName = "\(firstName) \(lastName)"
+                    case .failure(let error):
+                        print("Failed to get data from path \(error)")
+                    }
+                }
+                
                 let conversationVC = MainTabbarController.create()
                 strongSelf.navigationController?.pushViewController(conversationVC, animated: true)
             } else {
@@ -200,7 +214,7 @@ extension LoginViewController: LoginButtonDelegate {
             }
             // Cached user's infor
             UserDefaults.standard.userEmail = userEmail
-           
+            UserDefaults.standard.userName = "\(firstName) \(lastName)"
             
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
                 if !exist {
@@ -211,7 +225,7 @@ extension LoginViewController: LoginButtonDelegate {
                         if sucess {
                             guard let url = URL(string: pictureURL) else { return }
                             // upload image
-                            UserDefaults.standard.userName = "\(firstName) \(lastName)"
+                            
                             URLSession.shared.dataTask(with: url) { data, response, error in
                                 guard let data = data else {
                                     return

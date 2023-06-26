@@ -20,7 +20,7 @@ enum MessageResponse {
     var string: String {
         switch self {
         case .message:
-            return "message"
+            return "messages"
         case .id:
             return "id"
         case .type:

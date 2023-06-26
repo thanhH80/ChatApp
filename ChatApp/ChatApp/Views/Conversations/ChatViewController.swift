@@ -14,26 +14,27 @@ class ChatViewController: MessagesViewController {
     
     private var sampleSender: Sender? {
         let email = UserDefaults.standard.userEmail
+        let senderName = UserDefaults.standard.userName
         return Sender(senderId: email ,
-                      displayName: "ThagionHS",
+                      displayName: senderName,
                       photoURL: "")
     }
     private var messages = [MessageModel]()
     private var reciverEmail: String = ""
-    private var id: String?
+    private var conversationId: String?
     public var isNewConversation = false
 
     class func create(with otherUserEmail: String, id: String) -> ChatViewController {
         let vc = ChatViewController.instantiate(storyboard: .conversation)
         vc.reciverEmail = otherUserEmail
-        vc.id = id
+        vc.conversationId = id
         return vc
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        getAllMessages()
+        getAllMessages(shouldscrollToLastItem: true)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -41,8 +42,8 @@ class ChatViewController: MessagesViewController {
         messageInputBar.inputTextView.becomeFirstResponder()
     }
     
-    private func getAllMessages() {
-        DatabaseManager.shared.getAllMessageForConversation(with: id ?? "") { [weak self] result in
+    private func getAllMessages(shouldscrollToLastItem: Bool) {
+        DatabaseManager.shared.getAllMessageForConversation(with: conversationId ?? "") { [weak self] result in
             switch result {
             case .success(let messages):
                 guard !messages.isEmpty else {
@@ -50,8 +51,13 @@ class ChatViewController: MessagesViewController {
                     return
                 }
                 self?.messages = messages
+                
                 DispatchQueue.main.async {
-                    self?.messagesCollectionView.reloadData()
+                    self?.messagesCollectionView.reloadDataAndKeepOffset()
+
+                    if shouldscrollToLastItem {
+                        self?.messagesCollectionView.scrollToLastItem()
+                    }
                 }
             case .failure(let error):
                 print("Got error when get all mess from ChatVC: \(error)")
@@ -79,22 +85,34 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
     
         print("Sending message: =>>> \(text)")
         
+        let newMessage = MessageModel(sender: sender,
+                                      messageId: messageID,
+                                      sentDate: Date(),
+                                      kind: .text(text))
+        messageInputBar.inputTextView.text = nil
         // Send message
         if isNewConversation {
             // create new in db
-            let newMessage = MessageModel(sender: sender,
-                                          messageId: messageID,
-                                          sentDate: Date(),
-                                          kind: .text(text))
-            DatabaseManager.shared.createNewConversation(with: reciverEmail, firstMessage: newMessage, reciverName: self.title ?? "User") { susscess in
+            DatabaseManager.shared.createNewConversation(with: reciverEmail, firstMessage: newMessage, reciverName: self.title ?? "User") { [weak self] susscess in
                 if susscess {
                     print("Sendding mess \(susscess)")
+                    self?.isNewConversation = false
                 } else {
                     print("Cannot sendding mess")
                 }
             }
         } else {
             // append to existing one
+            guard let conversationID = conversationId,
+                  let reciverName = self.title else { return }
+
+            DatabaseManager.shared.sendMessage(to: conversationID, reciverName: reciverName, otherUserEmail: reciverEmail, newMessage: newMessage) { success in
+                if success {
+                    print("message sent")
+                } else {
+                    print("not sent")
+                }
+            }
         }
     }
     
