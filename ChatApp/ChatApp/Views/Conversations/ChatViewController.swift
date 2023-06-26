@@ -53,7 +53,7 @@ class ChatViewController: MessagesViewController {
                 self?.messages = messages
                 
                 DispatchQueue.main.async {
-                    self?.messagesCollectionView.reloadDataAndKeepOffset()
+                    self?.messagesCollectionView.reloadData()
 
                     if shouldscrollToLastItem {
                         self?.messagesCollectionView.scrollToLastItem()
@@ -93,7 +93,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         // Send message
         if isNewConversation {
             // create new in db
-            DatabaseManager.shared.createNewConversation(with: reciverEmail, firstMessage: newMessage, reciverName: self.title ?? "User") { [weak self] susscess in
+            DatabaseManager.shared.createNewConversationOnUser(with: reciverEmail, firstMessage: newMessage, reciverName: self.title ?? "User") { [weak self] susscess in
                 if susscess {
                     print("Sendding mess \(susscess)")
                     self?.isNewConversation = false
