@@ -15,6 +15,7 @@ class NewConversationViewController: BaseViewController {
     private var userResult = DatabaseManager.UserCollection()
     private var users = DatabaseManager.UserCollection()
     private var hasFetched = false
+    public var completion: (([String: String]) -> (Void))?
     
     class func create() -> NewConversationViewController {
         let vc = NewConversationViewController.instantiate(storyboard: .conversation)
@@ -67,7 +68,7 @@ extension NewConversationViewController: UISearchBarDelegate {
         guard hasFetched else { return }
         dismisHUD()
         let result = users.filter({
-            guard let userName = $0["userName"]?.lowercased() else {
+            guard let userName = $0[UserResponse.userName.dto]?.lowercased() else {
                 return false
             }
             return userName.contains(query.lowercased())
@@ -94,6 +95,10 @@ extension NewConversationViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
         // start a conversation
+        let foudUser = userResult[indexPath.row]
+        dismiss(animated: true) { [weak self] in
+            self?.completion?(foudUser)
+        }
     }
 }
 
@@ -107,7 +112,7 @@ extension NewConversationViewController: UITableViewDataSource {
         if userResult.isEmpty {
             cell.textLabel?.text = "No user found"
         } else {
-            cell.textLabel?.text = userResult[indexPath.row]["userName"]
+            cell.textLabel?.text = userResult[indexPath.row][UserResponse.userName.dto]
         }
         
         return cell

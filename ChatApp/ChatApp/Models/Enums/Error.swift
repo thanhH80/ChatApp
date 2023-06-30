@@ -14,5 +14,8 @@ enum StorageErorr: Error {
 
 enum DatabaseError: Error {
     case failedToGetUser
+    case failedToGetConversations
+    case failedToGetMessages
+    case failedToGetData
 }
 

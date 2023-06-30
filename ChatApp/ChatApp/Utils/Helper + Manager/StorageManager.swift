@@ -21,7 +21,7 @@ final class StorageManager {
 extension StorageManager {
     /// upload user's profile picture to Firebase and get download URL
     public func uploadProfilePicture(with data: Data, fileName: String, completion: @escaping UploadImageCompletion ) {
-        storage.child("images/\(fileName)").putData(data, metadata: nil) { _ , uploadError in
+        storage.child("\(DatabasePath.images.dto)/\(fileName)").putData(data, metadata: nil) { _ , uploadError in
             guard uploadError == nil else {
                 print("Failed to upload images")
                 // failed
@@ -29,7 +29,7 @@ extension StorageManager {
                 return
             }
             
-            self.storage.child("images/\(fileName)").downloadURL { url, error in
+            self.storage.child("\(DatabasePath.images.dto)/\(fileName)").downloadURL { url, error in
                 guard let url = url else {
                     completion(.failure(StorageErorr.failedToGetDownloadURL))
                     return

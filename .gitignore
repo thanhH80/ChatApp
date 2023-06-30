@@ -82,6 +82,15 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+#Custom
+ChatApp/Pods/FBSDKCoreKit/XCFrameworks/FBSDKCoreKit.xcframework/ios-arm64_armv7/FBSDKCoreKit.framework/FBSDKCoreKit
+ChatApp/Pods/FBSDKCoreKit/XCFrameworks/FBSDKCoreKit.xcframework/ios-arm64_i386_x86_64-simulator/FBSDKCoreKit.framework/FBSDKCoreKit
+ChatApp/Pods/FBSDKCoreKit/XCFrameworks/FBSDKCoreKit.xcframework/ios-arm64_x86_64-maccatalyst/FBSDKCoreKit.framework/FBSDKCoreKit
+ChatApp/Pods/FBSDKCoreKit/XCFrameworks/FBSDKCoreKit.xcframework/tvos-arm64/FBSDKCoreKit.framework/FBSDKCoreKit
+ChatApp/Pods/FBSDKCoreKit/XCFrameworks/FBSDKCoreKit.xcframework/tvos-arm64_x86_64-simulator/FBSDKCoreKit.framework/FBSDKCoreKit
+ChatApp/Pods/FBSDKLoginKit/XCFrameworks/FBSDKLoginKit.xcframework/ios-arm64_armv7/FBSDKLoginKit.framework/FBSDKLoginKit
+ChatApp/Pods/FBSDKLoginKit/XCFrameworks/FBSDKLoginKit.xcframework/ios-arm64_i386_x86_64-simulator/FBSDKLoginKit.framework/FBSDKLoginKit
+
 # Code Injection
 #
 # After new code Injection tools there's a generated folder /iOSInjectionProject

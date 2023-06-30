@@ -53,13 +53,14 @@ class ProfileViewController: BaseViewController {
     }
     
     private func downloadProfilePicture() {
-        guard let email = UserDefaults.standard.value(forKey: "email") as? String else { return }
+        let email = UserDefaults.standard.userEmail
         let fileName = String.makeSafe(email) + StringContant.avatarSuffix.rawValue
         let path = "images/" + fileName
         
         StorageManager.shared.fetchDownloadURL(for: path) { [weak self] result in
             switch result {
             case .success(let url):
+                print("Downloaded profile picture")
                 self?.downloadImage(imageView: self?.profilePictureImageView ?? UIImageView(), url: url)
             case .failure(let error):
                 print("Got error when fetch download url: \(error)")

@@ -20,4 +20,34 @@ extension UserDefaults {
             setValue(newValue, forKey: UserStatus.isLoggedIn.rawValue)
         }
     }
+    
+    private enum UserInfor: String {
+        case userEmail
+        case profilePictureURL
+        case userName
+    }
+    
+    var userName: String {
+        get {
+            string(forKey: UserInfor.userName.rawValue) ?? ""
+        } set {
+            setValue(newValue, forKey: UserInfor.userName.rawValue)
+        }
+    }
+    
+    var userEmail: String {
+        get {
+            string(forKey: UserInfor.userEmail.rawValue) ?? ""
+        } set {
+            setValue(newValue, forKey: UserInfor.userEmail.rawValue)
+        }
+    }
+    
+    var profilePictureURL: String {
+        get {
+            string(forKey: UserInfor.profilePictureURL.rawValue) ?? ""
+        } set {
+            setValue(newValue, forKey: UserInfor.profilePictureURL.rawValue)
+        }
+    }
 }

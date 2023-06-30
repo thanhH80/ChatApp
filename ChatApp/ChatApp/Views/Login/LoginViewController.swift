@@ -53,7 +53,7 @@ class LoginViewController: BaseViewController {
         let userEmail = emailTextField.string
         let password = passwordTextField.string
         
-        UserDefaults.standard.set(userEmail, forKey: "email")
+        UserDefaults.standard.userEmail = userEmail
         
         alertUser()
         
@@ -64,6 +64,20 @@ class LoginViewController: BaseViewController {
             strongSelf.dismisHUD()
             
             if authResult != nil, authError == nil {
+                DatabaseManager.shared.getDataFromPath(path: String.makeSafe(userEmail)) { result in
+                    switch result {
+                    case .success(let data):
+                        guard let userData = data as? [String: Any],
+                              let firstName = userData[UserResponse.firstName.dto] as? String,
+                              let lastName = userData[UserResponse.lastName.dto] as? String else {
+                            return
+                        }
+                        UserDefaults.standard.userName = "\(firstName) \(lastName)"
+                    case .failure(let error):
+                        print("Failed to get data from path \(error)")
+                    }
+                }
+                
                 let conversationVC = MainTabbarController.create()
                 strongSelf.navigationController?.pushViewController(conversationVC, animated: true)
             } else {
@@ -115,7 +129,7 @@ class LoginViewController: BaseViewController {
                 print("Cannot found user's profile")
                 return
             }
-            UserDefaults.standard.set(userEmail, forKey: "email")
+            UserDefaults.standard.userEmail = userEmail
             strongSelf.showHUD(in: strongSelf.view)
             
             // Check user
@@ -124,21 +138,23 @@ class LoginViewController: BaseViewController {
                 let firstName = gUser.profile?.givenName
                 let lastName = gUser.profile?.familyName
                 if !exist {
-                    let user = UserModel(firstname: firstName ?? "No Name",
-                                         lastname: lastName ?? "No Name",
+                    let user = UserModel(firstname: firstName ?? "",
+                                         lastname: lastName ?? "",
                                          emailAddress: userEmail)
                     DatabaseManager.shared.inserUser(with: user) { sucess in
                         if sucess {
                             // upload image
+                            UserDefaults.standard.userName = "\(firstName ?? "") \(lastName ?? "")"
                             URLSession.shared.dataTask(with: profileURL) { data, _ , _ in
                                 guard let data = data else {
                                     return
                                 }
+                                
                                 let fileName = user.profilePicName
                                 StorageManager.shared.uploadProfilePicture(with: data, fileName: fileName) { result in
                                     switch result {
                                     case .success(let downloadURL):
-                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        UserDefaults.standard.profilePictureURL = downloadURL
                                         print(downloadURL)
                                     case .failure(let e):
                                         print("Got error when upload image \(e)")
@@ -187,16 +203,18 @@ extension LoginViewController: LoginButtonDelegate {
                 return
             }
             
-            guard let firstName = result["first_name"] as? String,
-                  let userEmail = result["email"] as? String,
-                  let picture = result["picture"] as? [String: Any],
-                  let data = picture["data"] as? [String: Any],
-                  let pictureURL = data["url"] as? String,
-                  let lastName =  result["last_name"] as? String else {
+            guard let firstName = result[UserResponse.firstName.dto] as? String,
+                  let userEmail = result[UserResponse.email.dto] as? String,
+                  let picture = result[DataResponse.picture.dto] as? [String: Any],
+                  let data = picture[DataResponse.data.dto] as? [String: Any],
+                  let pictureURL = data[DataResponse.url.dto] as? String,
+                  let lastName =  result[UserResponse.lastName.dto] as? String else {
                 print("Failed to get infor from result")
                 return
             }
-            UserDefaults.standard.set(userEmail, forKey: "email")
+            // Cached user's infor
+            UserDefaults.standard.userEmail = userEmail
+            UserDefaults.standard.userName = "\(firstName) \(lastName)"
             
             DatabaseManager.shared.checkExistedUser(userEmail: userEmail) { exist in
                 if !exist {
@@ -207,6 +225,7 @@ extension LoginViewController: LoginButtonDelegate {
                         if sucess {
                             guard let url = URL(string: pictureURL) else { return }
                             // upload image
+                            
                             URLSession.shared.dataTask(with: url) { data, response, error in
                                 guard let data = data else {
                                     return
@@ -216,7 +235,7 @@ extension LoginViewController: LoginButtonDelegate {
                                                                            fileName: fileName) { result in
                                     switch result {
                                     case .success(let downloadURL):
-                                        UserDefaults.standard.set(downloadURL, forKey: "profile_picture_url")
+                                        UserDefaults.standard.profilePictureURL = downloadURL
                                         print(downloadURL)
                                     case .failure(let e):
                                         print("Got error when upload image \(e)")

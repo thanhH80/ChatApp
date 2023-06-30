@@ -20,3 +20,41 @@ struct Sender: SenderType {
     var displayName: String
     var photoURL: String
 }
+
+
+extension MessageKind {
+    var description: String {
+        switch self {
+        case .text(_):
+            return "text"
+        case .attributedText(_):
+            return "attributed_text"
+        case .photo(_):
+            return "photo"
+        case .video(_):
+            return "video"
+        case .location(_):
+            return "location"
+        case .emoji(_):
+            return "emoji"
+        case .audio(_):
+            return "audio"
+        case .contact(_):
+            return "contact"
+        case .linkPreview(_):
+            return "link_preview"
+        case .custom(_):
+            return "custom"
+        }
+    }
+    
+    var text: String {
+        switch self {
+        case .text(let message):
+            return message
+        case .attributedText(_), .photo(_), .video(_), .location(_), .emoji(_), .audio(_), .contact(_), .linkPreview(_), .custom(_):
+            return ""
+        }
+    }
+    
+}
