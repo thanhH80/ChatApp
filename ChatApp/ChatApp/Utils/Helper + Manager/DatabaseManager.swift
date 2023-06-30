@@ -353,7 +353,6 @@ extension DatabaseManager {
                                       email: String,
                                       message: MessageModel,
                                       completion: @escaping (Bool) -> Void) {
-        
         dbRef.child("\(email)/\(ConversationResponse.conversations.string)")
             .observeSingleEvent(of: .value) { [weak self] snapshot in
                 guard var currentConversations = snapshot.value as? [DatabaseEntryType],
@@ -362,24 +361,18 @@ extension DatabaseManager {
                     return
                 }
                 let updatedMess = message.kind.text
-                var updatedEntry = DatabaseEntryType()
-                var position = 0
                 let updatedValue: DatabaseEntryType = [
                     ConversationResponse.content.string: updatedMess,
                     ConversationResponse.date.string: strongSelf.getDateString(from: message),
                     ConversationResponse.isRead.string: false
                 ]
-                for conversation in currentConversations {
+                for (i, conversation) in currentConversations.enumerated() {
                     if let convoID = conversation[ConversationResponse.id.string] as? String,
                        convoID == conversaionID {
-                        updatedEntry = conversation
+                        currentConversations[i][ConversationResponse.lastestMessage.string] = updatedValue
                         break
                     }
-                    position += 1
                 }
-                
-                updatedEntry[ConversationResponse.lastestMessage.string] = updatedValue
-                currentConversations[position] = updatedEntry
                 strongSelf.dbRef.child("\(email)/\(ConversationResponse.conversations.string)")
                     .setValue(currentConversations) { err, _ in
                         if err == nil {
