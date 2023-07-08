@@ -6,24 +6,32 @@
 //
 
 import UIKit
+import SDWebImage
 
-class PlayerViewController: UIViewController {
+class PlayerViewController: BaseViewController {
+    
+    @IBOutlet private weak var imageView: UIImageView!
+    
+    var urlImage: URL?
+    
+    class func create(with urlImage: URL?) -> PlayerViewController {
+        let vc = PlayerViewController.instantiate(storyboard: .player)
+        vc.urlImage = urlImage
+        return vc
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        setupUI()
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    override func viewWillAppear(_ animated: Bool) {
+        customNavigationTitleView(title: "Photo")
     }
-    */
+    
+    private func setupUI() {
+        navigationItem.largeTitleDisplayMode = .never
+        imageView.sd_setImage(with: urlImage)
+    }
 
 }

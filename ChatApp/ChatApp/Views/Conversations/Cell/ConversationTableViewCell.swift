@@ -25,7 +25,7 @@ class ConversationTableViewCell: UITableViewCell {
         
         let pathImage = "\(DatabasePath.images.dto)/\(model.ohterUserEmail)\(StringContant.avatarSuffix.rawValue)"
 
-        StorageManager.shared.fetchDownloadURL(for: pathImage) { [weak self] result in
+        StorageManager.shared.downloadWithURL(for: pathImage) { [weak self] result in
             switch result {
             case .success(let url):
                 DispatchQueue.main.async {

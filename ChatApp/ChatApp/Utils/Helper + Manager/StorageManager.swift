@@ -41,7 +41,28 @@ extension StorageManager {
         }
     }
     
-    public func fetchDownloadURL(for path: String, completion: @escaping (Result<URL, StorageErorr>) -> Void ) {
+    public func uploadPhotoMessage(with data: Data, fileName: String, completion: @escaping UploadImageCompletion ) {
+        storage.child("message_images/\(fileName)").putData(data, metadata: nil) { _ , uploadError in
+            guard uploadError == nil else {
+                print("Failed to upload images")
+                // failed
+                completion(.failure(StorageErorr.failedToUpload))
+                return
+            }
+            
+            self.storage.child("message_images/\(fileName)").downloadURL { url, error in
+                guard let url = url else {
+                    completion(.failure(StorageErorr.failedToGetDownloadURL))
+                    return
+                }
+                let urlString = url.absoluteString
+                print("Downloaded url: \(urlString)")
+                completion(.success(urlString))
+            }
+        }
+    }
+    
+    public func downloadWithURL(for path: String, completion: @escaping (Result<URL, StorageErorr>) -> Void ) {
         let ref = storage.child(path)
         ref.downloadURL { url, error in
             guard let url = url else {

@@ -57,7 +57,7 @@ class ProfileViewController: BaseViewController {
         let fileName = String.makeSafe(email) + StringContant.avatarSuffix.rawValue
         let path = "images/" + fileName
         
-        StorageManager.shared.fetchDownloadURL(for: path) { [weak self] result in
+        StorageManager.shared.downloadWithURL(for: path) { [weak self] result in
             switch result {
             case .success(let url):
                 print("Downloaded profile picture")

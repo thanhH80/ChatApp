@@ -149,7 +149,31 @@ extension DatabaseManager {
                 print("User not found")
                 return
             }
-            let message = firstMessage.kind.text
+            var message = ""
+            switch firstMessage.kind {
+            case .text(let messageText):
+                message = messageText
+            case .attributedText(_):
+                break
+            case .photo(let photoMedia):
+                if let photoURL = photoMedia.url?.absoluteString {
+                    message = photoURL
+                }
+            case .video(_):
+                break
+            case .location(_):
+                break
+            case .emoji(_):
+                break
+            case .audio(_):
+                break
+            case .contact(_):
+                break
+            case .linkPreview(_):
+                break
+            case .custom(_):
+                break
+            }
             let conversationID = "\(ConversationResponse.conversations.string)_\(firstMessage.messageId)"
             let dateString = strongSelf.getDateString(from: firstMessage)
             let newConversation = strongSelf.createConversationEntry(with: conversationID,
@@ -291,12 +315,29 @@ extension DatabaseManager {
                       let dateString = dictionary[MessageResponse.date.string] as? String,
                       let sentDate = dateString.toDate(withFormat: dateAndTimeFormat),
                       //                      let isReadMess = dictionary[MessageResponse.isRead.string] as? Bool,
-                      //                      let messTpye = dictionary[MessageResponse.type.string] as? String,
+                      let messTpye = dictionary[MessageResponse.type.string] as? String,
                         let content = dictionary[MessageResponse.content.string] as? String else {
                     return nil
                 }
+                
+                var kind: MessageKind?
+                if messTpye == "photo" {
+                    guard let imgURL = URL(string: content),
+                          let placeholderImg = UIImage(systemName: "plus") else { return nil }
+                    
+                    let photoMess = Media(url: imgURL,
+                                          image: nil,
+                                          placeholderImage: placeholderImg,
+                                          size: CGSize(width: 200, height: 200))
+                    kind = .photo(photoMess)
+                } else {
+                    kind = .text(content)
+                }
+                
+                guard let finalKind = kind else { return nil }
+                
                 let sender = Sender(senderId: senderEmail, displayName: reciverName, photoURL: "")
-                return MessageModel(sender: sender, messageId: messageID, sentDate: sentDate, kind: .text(content))
+                return MessageModel(sender: sender, messageId: messageID, sentDate: sentDate, kind: finalKind)
             }
             completion(.success(messages))
         }
@@ -315,10 +356,33 @@ extension DatabaseManager {
                     completion(false)
                     return
                 }
-                
-                let message = newMessage.kind.text
-                //let currentUserEmail = String.makeSafe(UserDefaults.standard.userEmail)
-                
+                var message = ""
+                switch newMessage.kind {
+                case .text(let messageText):
+                    message = messageText
+                    break
+                case .attributedText(_):
+                    break
+                case .photo(let photoMedia):
+                    if let photoURL = photoMedia.url?.absoluteString {
+                        message = photoURL
+                    }
+                    break
+                case .video(_):
+                    break
+                case .location(_):
+                    break
+                case .emoji(_):
+                    break
+                case .audio(_):
+                    break
+                case .contact(_):
+                    break
+                case .linkPreview(_):
+                    break
+                case .custom(_):
+                    break
+                }
                 let messageEntry: DatabaseEntryType = [
                     MessageResponse.id.string: newMessage.messageId,
                     MessageResponse.type.string: newMessage.kind.description,

@@ -21,6 +21,13 @@ struct Sender: SenderType {
     var photoURL: String
 }
 
+struct Media: MediaItem {
+    var url: URL?
+    var image: UIImage?
+    var placeholderImage: UIImage
+    var size: CGSize
+}
+
 
 extension MessageKind {
     var description: String {

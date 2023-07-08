@@ -25,7 +25,7 @@ public let timeFormat: String = {
 }()
 
 public let dateAndTimeFormat: String = {
-    return "dd/MM/yyy 'at' HH:mm"
+    return "dd-MM-yyy-HH:mm"
 }()
 
 extension Date {
