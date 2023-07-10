@@ -51,13 +51,9 @@ class ConversationViewController: BaseViewController {
         present(navC, animated: true, completion: nil)
     }
     
-    private func createNewConversation(result: [String: String]) {
-        guard let userName = result[UserResponse.userName.dto],
-              let email = result[UserResponse.email.dto] else {
-            print("Cannot get user's name and email")
-            return
-        }
-        
+    private func createNewConversation(result: SearchResult) {
+        let userName = result.name
+        let email = result.email
         let messVC = ChatViewController.create(with: email, id: "")
         messVC.title = userName
         messVC.isNewConversation = true

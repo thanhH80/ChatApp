@@ -12,10 +12,20 @@ class NewConversationViewController: BaseViewController {
     @IBOutlet private weak var newConTblView: UITableView!
     @IBOutlet private weak var searchBar: UISearchBar!
     
-    private var userResult = DatabaseManager.UserCollection()
+    private var userResult = [SearchResult]()
     private var users = DatabaseManager.UserCollection()
     private var hasFetched = false
-    public var completion: (([String: String]) -> (Void))?
+    public var completion: ((SearchResult) -> (Void))?
+    
+    private let noResultsLabel: UILabel = {
+        let label = UILabel()
+        label.isHidden = true
+        label.text = "No Results"
+        label.textAlignment = .center
+        label.textColor = .blue6A9CFD
+        label.font = .systemFont(ofSize: 21, weight: .medium)
+        return label
+    }()
     
     class func create() -> NewConversationViewController {
         let vc = NewConversationViewController.instantiate(storyboard: .conversation)
@@ -24,70 +34,100 @@ class NewConversationViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        setupUI()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        noResultsLabel.frame = CGRect(x: view.width/4,
+                                      y: (view.height-200)/2,
+                                      width: view.width/2,
+                                      height: 200)
     }
     
     private func setupUI() {
-        
+        searchBar.becomeFirstResponder()
+        view.addSubview(noResultsLabel)
     }
 
 }
 
 extension NewConversationViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let query = searchBar.text, !query.replacingOccurrences(of: " ", with: "").isEmpty else {
-            userResult.removeAll()
+        guard let text = searchBar.text, !text.replacingOccurrences(of: " ", with: "").isEmpty else {
             return
         }
-      //  userResult.removeAll()
-        //newConTblView.reloadData()
+
+        searchBar.becomeFirstResponder()
+        userResult.removeAll()
         showHUD(in: view)
-        searchUser(with: query)
+
+        searchUsers(query: text)
     }
-    
-    private func searchUser(with query: String) {
+
+    func searchUsers(query: String) {
         if hasFetched {
-            fillterUsers(with: query)
-        } else {
+            filterUsers(with: query)
+        }
+        else {
             DatabaseManager.shared.getAllUser { [weak self] result in
-                self?.dismisHUD()
                 switch result {
-                case .success(let userCollection):
+                case .success(let usersCollection):
                     self?.hasFetched = true
-                    self?.users = userCollection
-                    self?.fillterUsers(with: query)
+                    self?.users = usersCollection
+                    self?.filterUsers(with: query)
                 case .failure(let error):
-                    print("Cannot foud user \(error)")
+                    print("Failed to get usres: \(error)")
                 }
             }
         }
-        
     }
-    
-    private func fillterUsers(with query: String) {
-        guard hasFetched else { return }
+
+    func filterUsers(with term: String) {
+        // update the UI: eitehr show results or show no results label
+        guard  hasFetched else {
+            return
+        }
+
+        let safeEmail = String.makeSafe(UserDefaults.standard.userEmail)
+
         dismisHUD()
-        let result = users.filter({
-            guard let userName = $0[UserResponse.userName.dto]?.lowercased() else {
+
+        let results: [SearchResult] = users.filter({
+            guard let email = $0[UserResponse.email.dto], email != safeEmail else {
                 return false
             }
-            return userName.contains(query.lowercased())
+
+            guard let name = $0[UserResponse.userName.dto]?.lowercased() else {
+                return false
+            }
+
+            return name.contains(term.lowercased())
+        }).compactMap({
+
+            guard let email = $0[UserResponse.email.dto],
+                let name = $0[UserResponse.userName.dto] else {
+                return nil
+            }
+
+            return SearchResult(name: name, email: email)
         })
-        userResult = result
+
+        userResult = results
+
         updateUI()
     }
-    
-    private func updateUI() {
+
+    func updateUI() {
         if userResult.isEmpty {
+            noResultsLabel.isHidden = false
             newConTblView.isHidden = true
-            let noResultLabel = UILabel(frame: .zero)
-            noResultLabel.text = "No user found"
-            noResultLabel.font = .systemFont(ofSize: 30)
-            noResultLabel.textAlignment = .center
-        } else {
+        }
+        else {
+            noResultsLabel.isHidden = true
+            newConTblView.isHidden = false
             newConTblView.reloadData()
         }
-        
     }
 }
 
@@ -109,11 +149,8 @@ extension NewConversationViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "newConCell", for: indexPath)
-        if userResult.isEmpty {
-            cell.textLabel?.text = "No user found"
-        } else {
-            cell.textLabel?.text = userResult[indexPath.row][UserResponse.userName.dto]
-        }
+        
+        cell.textLabel?.text = userResult[indexPath.row].name
         
         return cell
     }
