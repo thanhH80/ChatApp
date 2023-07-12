@@ -46,6 +46,7 @@ class NewConversationViewController: BaseViewController {
     }
     
     private func setupUI() {
+        newConTblView.registerNib(cellClass: NewConversationTableViewCell.self)
         searchBar.becomeFirstResponder()
         view.addSubview(noResultsLabel)
     }
@@ -140,6 +141,10 @@ extension NewConversationViewController: UITableViewDelegate {
             self?.completion?(foudUser)
         }
     }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 120.0
+    }
 }
 
 extension NewConversationViewController: UITableViewDataSource {
@@ -148,10 +153,9 @@ extension NewConversationViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "newConCell", for: indexPath)
-        
-        cell.textLabel?.text = userResult[indexPath.row].name
-        
+        let cell = tableView.dequeueCell(ofType: NewConversationTableViewCell.self, for: indexPath)
+        let model = userResult[indexPath.row]
+        cell.config(with: model)
         return cell
     }
     

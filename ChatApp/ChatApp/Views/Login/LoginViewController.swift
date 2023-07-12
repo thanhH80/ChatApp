@@ -192,8 +192,9 @@ extension LoginViewController: LoginButtonDelegate {
         let fbCredential = FacebookAuthProvider.credential(withAccessToken: token)
         
         let fbRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
-                                                   parameters: ["fields" :
-                                                                    "email, first_name, last_name, picture.type(large)"],
+                                                   parameters: [
+                                                    "fields" : "email, first_name, last_name, picture.type(large)"
+                                                   ],
                                                    tokenString: token,
                                                    version: nil,
                                                    httpMethod: .get)
@@ -244,6 +245,8 @@ extension LoginViewController: LoginButtonDelegate {
                             }.resume()
                         }
                     }
+                } else {
+                    print("User already exist")
                 }
             }
         }

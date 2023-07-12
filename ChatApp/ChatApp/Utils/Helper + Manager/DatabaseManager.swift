@@ -32,7 +32,7 @@ extension DatabaseManager {
     public func checkExistedUser(userEmail: String,
                                  completion: @escaping (Bool) -> Void) {
         dbRef.child(String.makeSafe(userEmail)).observeSingleEvent(of: .value) { snapshot in
-            guard snapshot.value as? String != nil else {
+            guard snapshot.exists() else {
                 completion(false)
                 return
             }
