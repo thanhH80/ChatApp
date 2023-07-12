@@ -159,7 +159,11 @@ extension DatabaseManager {
                 if let photoURL = photoMedia.url?.absoluteString {
                     message = photoURL
                 }
-            case .video(_):
+                break
+            case .video(let videoMedia):
+                if let videoURL = videoMedia.url?.absoluteString {
+                    message = videoURL
+                }
                 break
             case .location(_):
                 break
@@ -205,7 +209,7 @@ extension DatabaseManager {
                 }
             
             
-            // if a conversation exists, append 
+            // if a conversation exists, append
             if var conversationCollection = userCollection[ConversationResponse.conversations.string] as? [DatabaseEntryType] {
                 conversationCollection.append(newConversation)
                 
@@ -316,7 +320,7 @@ extension DatabaseManager {
                       let sentDate = dateString.toDate(withFormat: dateAndTimeFormat),
                       //                      let isReadMess = dictionary[MessageResponse.isRead.string] as? Bool,
                       let messTpye = dictionary[MessageResponse.type.string] as? String,
-                        let content = dictionary[MessageResponse.content.string] as? String else {
+                      let content = dictionary[MessageResponse.content.string] as? String else {
                     return nil
                 }
                 
@@ -330,6 +334,15 @@ extension DatabaseManager {
                                           placeholderImage: placeholderImg,
                                           size: CGSize(width: 200, height: 200))
                     kind = .photo(photoMess)
+                } else if messTpye == "video" {
+                    guard let videoURL = URL(string: content),
+                          let placeholderVid = UIImage(named: "video_placeholder") else { return nil }
+
+                    let vidMess = Media(url: videoURL,
+                                        image: nil,
+                                        placeholderImage: placeholderVid,
+                                        size: CGSize(width: 200, height: 200))
+                    kind = .video(vidMess)
                 } else {
                     kind = .text(content)
                 }
@@ -349,73 +362,79 @@ extension DatabaseManager {
                             newMessage: MessageModel,
                             completion: @escaping (Bool) -> Void) {
         let currentEmail = String.makeSafe(UserDefaults.standard.userEmail)
-        dbRef.child("\(conversationID)/\(MessageResponse.message.string)")
-            .observeSingleEvent(of: .value) { [weak self] snapshot in
-                guard var currentMessCollection = snapshot.value as? [DatabaseEntryType],
-                      let strongSelf = self else {
-                    completion(false)
-                    return
-                }
-                var message = ""
-                switch newMessage.kind {
-                case .text(let messageText):
-                    message = messageText
-                    break
-                case .attributedText(_):
-                    break
-                case .photo(let photoMedia):
-                    if let photoURL = photoMedia.url?.absoluteString {
-                        message = photoURL
-                    }
-                    break
-                case .video(_):
-                    break
-                case .location(_):
-                    break
-                case .emoji(_):
-                    break
-                case .audio(_):
-                    break
-                case .contact(_):
-                    break
-                case .linkPreview(_):
-                    break
-                case .custom(_):
-                    break
-                }
-                let messageEntry: DatabaseEntryType = [
-                    MessageResponse.id.string: newMessage.messageId,
-                    MessageResponse.type.string: newMessage.kind.description,
-                    MessageResponse.content.string: message,
-                    MessageResponse.date.string: strongSelf.getDateString(from: newMessage),
-                    MessageResponse.senderEmail.string: UserDefaults.standard.userEmail,
-                    MessageResponse.name.string: reciverName,
-                    MessageResponse.isRead.string: false
-                ]
-                currentMessCollection.append(messageEntry)
-                
-                strongSelf.dbRef.child("\(conversationID)/\(MessageResponse.message.string)")
-                    .setValue(currentMessCollection, withCompletionBlock: { err, _ in
-                        guard err == nil else {
-                            completion(false)
-                            return
-                        }
-                        strongSelf.updateLastestMessage(conversaionID: conversationID,
-                                                        email: currentEmail,
-                                                        message: newMessage,
-                                                        completion: completion)
-                        
-                        strongSelf.updateLastestMessage(conversaionID: conversationID,
-                                                        email: otherUserEmail,
-                                                        message: newMessage,
-                                                        completion: completion)
-                    })
+        dbRef.child("\(conversationID)/\(MessageResponse.message.string)").observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard var currentMessCollection = snapshot.value as? [DatabaseEntryType],
+                  let strongSelf = self else {
+                completion(false)
+                return
             }
+            var message = ""
+            switch newMessage.kind {
+            case .text(let messageText):
+                message = messageText
+                break
+            case .attributedText(_):
+                break
+            case .photo(let photoMedia):
+                if let photoURL = photoMedia.url?.absoluteString {
+                    message = photoURL
+                }
+                break
+            case .video(let photoMedia):
+                if let videoURL = photoMedia.url?.absoluteString {
+                    message = videoURL
+                }
+                break
+            case .location(_):
+                break
+            case .emoji(_):
+                break
+            case .audio(_):
+                break
+            case .contact(_):
+                break
+            case .linkPreview(_):
+                break
+            case .custom(_):
+                break
+            }
+            let dateString = strongSelf.getDateString(from: newMessage)
+            let messageEntry: DatabaseEntryType = [
+                MessageResponse.id.string: newMessage.messageId,
+                MessageResponse.type.string: newMessage.kind.description,
+                MessageResponse.content.string: message,
+                MessageResponse.date.string: dateString,
+                MessageResponse.senderEmail.string: UserDefaults.standard.userEmail,
+                MessageResponse.name.string: reciverName,
+                MessageResponse.isRead.string: false
+            ]
+            currentMessCollection.append(messageEntry)
+            
+            strongSelf.dbRef.child("\(conversationID)/\(MessageResponse.message.string)")
+                .setValue(currentMessCollection, withCompletionBlock: { err, _ in
+                    guard err == nil else {
+                        completion(false)
+                        return
+                    }
+                    strongSelf.updateLastestMessage(conversaionID: conversationID,
+                                                    email: currentEmail,
+                                                    message: message,
+                                                    dateString: dateString,
+                                                    completion: completion)
+                    
+                    strongSelf.updateLastestMessage(conversaionID: conversationID,
+                                                    email: otherUserEmail,
+                                                    message: message,
+                                                    dateString: dateString,
+                                                    completion: completion)
+                })
+        }
     }
     
     private func updateLastestMessage(conversaionID: String,
                                       email: String,
-                                      message: MessageModel,
+                                      message: String,
+                                      dateString: String,
                                       completion: @escaping (Bool) -> Void) {
         dbRef.child("\(email)/\(ConversationResponse.conversations.string)")
             .observeSingleEvent(of: .value) { [weak self] snapshot in
@@ -424,10 +443,9 @@ extension DatabaseManager {
                     completion(false)
                     return
                 }
-                let updatedMess = message.kind.text
                 let updatedValue: DatabaseEntryType = [
-                    ConversationResponse.content.string: updatedMess,
-                    ConversationResponse.date.string: strongSelf.getDateString(from: message),
+                    ConversationResponse.content.string: message,
+                    ConversationResponse.date.string: dateString,
                     ConversationResponse.isRead.string: false
                 ]
                 for (i, conversation) in currentConversations.enumerated() {
