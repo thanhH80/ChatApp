@@ -398,11 +398,12 @@ extension DatabaseManager {
             case .custom(_):
                 break
             }
+            let dateString = strongSelf.getDateString(from: newMessage)
             let messageEntry: DatabaseEntryType = [
                 MessageResponse.id.string: newMessage.messageId,
                 MessageResponse.type.string: newMessage.kind.description,
                 MessageResponse.content.string: message,
-                MessageResponse.date.string: strongSelf.getDateString(from: newMessage),
+                MessageResponse.date.string: dateString,
                 MessageResponse.senderEmail.string: UserDefaults.standard.userEmail,
                 MessageResponse.name.string: reciverName,
                 MessageResponse.isRead.string: false
@@ -417,12 +418,14 @@ extension DatabaseManager {
                     }
                     strongSelf.updateLastestMessage(conversaionID: conversationID,
                                                     email: currentEmail,
-                                                    message: newMessage,
+                                                    message: message,
+                                                    dateString: dateString,
                                                     completion: completion)
                     
                     strongSelf.updateLastestMessage(conversaionID: conversationID,
                                                     email: otherUserEmail,
-                                                    message: newMessage,
+                                                    message: message,
+                                                    dateString: dateString,
                                                     completion: completion)
                 })
         }
@@ -430,7 +433,8 @@ extension DatabaseManager {
     
     private func updateLastestMessage(conversaionID: String,
                                       email: String,
-                                      message: MessageModel,
+                                      message: String,
+                                      dateString: String,
                                       completion: @escaping (Bool) -> Void) {
         dbRef.child("\(email)/\(ConversationResponse.conversations.string)")
             .observeSingleEvent(of: .value) { [weak self] snapshot in
@@ -439,10 +443,9 @@ extension DatabaseManager {
                     completion(false)
                     return
                 }
-                let updatedMess = message.kind.text
                 let updatedValue: DatabaseEntryType = [
-                    ConversationResponse.content.string: updatedMess,
-                    ConversationResponse.date.string: strongSelf.getDateString(from: message),
+                    ConversationResponse.content.string: message,
+                    ConversationResponse.date.string: dateString,
                     ConversationResponse.isRead.string: false
                 ]
                 for (i, conversation) in currentConversations.enumerated() {
