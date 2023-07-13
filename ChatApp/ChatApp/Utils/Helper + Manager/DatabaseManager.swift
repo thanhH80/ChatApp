@@ -465,4 +465,40 @@ extension DatabaseManager {
                     }
             }
     }
+    
+    /// Delete conversation with conversation ID
+    public func deleteConversation(with conversationID: String, completion: @escaping (Bool) -> Void) {
+        let userEmail = UserDefaults.standard.userEmail
+        let safeEmail = String.makeSafe(userEmail)
+        let conversationPath = "\(safeEmail)/\(ConversationResponse.conversations.string)"
+        dbRef.child(conversationPath).observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard var conversationCollection = snapshot.value as? [DatabaseEntryType] else {
+                completion(false)
+                return
+            }
+            
+            for (i, conversation) in conversationCollection.enumerated() {
+                if let converID = conversation[ConversationResponse.id.string] as? String,
+                   converID == conversationID {
+                    conversationCollection.remove(at: i)
+                    
+                    // delete conversation node
+                    self?.dbRef.child(conversationID).removeValue(completionBlock: { err, _ in
+                        guard err == nil else {
+                            completion(false)
+                            return
+                        }
+                    })
+                }
+            }
+            
+            self?.dbRef.child(conversationPath).setValue(conversationCollection) { error, _ in
+                guard error == nil else {
+                    completion(false)
+                    return
+                }
+            }
+            completion(true)
+        }
+    }
 }

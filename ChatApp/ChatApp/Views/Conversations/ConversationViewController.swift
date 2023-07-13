@@ -106,8 +106,19 @@ extension ConversationViewController: UITableViewDelegate {
     // Delete conversation
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            conversationsList.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
+            let conversationID = conversationsList[indexPath.row].id
+            print(conversationID)
+            DatabaseManager.shared.deleteConversation(with: conversationID) { [weak self] susscess in
+                if susscess {
+                    DispatchQueue.main.async {
+                        self?.conversationsList.remove(at: indexPath.row)
+                        tableView.deleteRows(at: [indexPath], with: .fade)
+                    }
+                } else {
+                    print("Cannot delete")
+                }
+            }
+            
         }
     }
 }
