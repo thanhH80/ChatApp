@@ -73,6 +73,7 @@ class LoginViewController: BaseViewController {
                             return
                         }
                         UserDefaults.standard.userName = "\(firstName) \(lastName)"
+                        UserDefaults.standard.isLoggedIn = true
                     case .failure(let error):
                         print("Failed to get data from path \(error)")
                     }
@@ -178,6 +179,7 @@ class LoginViewController: BaseViewController {
                     }
                     return
                 }
+                UserDefaults.standard.isLoggedIn = true
                 strongSelf.navigateToHome()
             }
         }
@@ -262,6 +264,7 @@ extension LoginViewController: LoginButtonDelegate {
             }
             
             // Login success
+            UserDefaults.standard.isLoggedIn = true
             strongSelf.navigateToHome()
         }
     }

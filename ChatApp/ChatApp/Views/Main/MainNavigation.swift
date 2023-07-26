@@ -28,9 +28,13 @@ class MainNavigation: Navigator {
             let vc = MainViewController.create(navigator: self)
             navigationController?.pushViewController(vc, animated: true)
         case .conversataion:
-            print("To conversation")
+            // persent base navigaton later
+            let vc = ConversationViewController.create()
+            navigationController?.pushViewController(vc, animated: true)
         case .login:
-            print("To Login")
+            // persent base navigaton later
+            let vc = LoginViewController.create()
+            navigationController?.pushViewController(vc, animated: true)
         }
     }
     
