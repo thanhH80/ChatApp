@@ -125,7 +125,7 @@ extension DatabaseManager {
                 ConversationResponse.date.string: dateString,
                 ConversationResponse.content.string: message,
                 ConversationResponse.isRead.string: false
-            ]
+            ] as [String : Any]
         ]
         return conversationEntry
     }
@@ -274,6 +274,38 @@ extension DatabaseManager {
             }
             completion(true)
         }
+    }
+    
+    /// Check conversation is existed or not
+    public func conversationExisted(with reciverEmail: String,
+                                    completion: @escaping (Result<String, DatabaseError>) -> Void) {
+        let senderEmail = UserDefaults.standard.userEmail
+        let safeSenderEmail = String.makeSafe(senderEmail)
+        let safeRecipEmail = String.makeSafe(reciverEmail)
+        
+        dbRef.child("\(safeRecipEmail)/\(ConversationResponse.conversations.string)").observeSingleEvent(of: .value) { snapshot in
+            guard let conversationCollection = snapshot.value as? [DatabaseEntryType] else {
+                completion(.failure(.failedToGetData))
+                return
+            }
+            
+            if let conversation = conversationCollection.first(where: {
+                guard let senderEmail = $0[ConversationResponse.otherEmail.string] as? String else {
+                    return false
+                }
+                return safeSenderEmail == senderEmail
+            }) {
+                guard let converID = conversation[ConversationResponse.id.string] as? String else {
+                    completion(.failure(.failedToGetData))
+                    return
+                }
+                completion(.success(converID))
+            }
+            
+            completion(.failure(.failedToGetData))
+            return
+        }
+        
     }
     
     /// Get all conversation for passed email

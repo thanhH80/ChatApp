@@ -45,19 +45,43 @@ class ConversationViewController: BaseViewController {
     @objc private func didTapSearch() {
         let newConVC = NewConversationViewController.create()
         newConVC.completion = { [weak self] userResult in
-            self?.createNewConversation(result: userResult)
+            let currentConversation = self?.conversationsList
+            if let targetConversation = currentConversation?.first(where: {
+                $0.ohterUserEmail == String.makeSafe(userResult.email)
+            }) {
+                let vc = ChatViewController.create(with: targetConversation.ohterUserEmail,
+                                                   id: targetConversation.id)
+                vc.isNewConversation = false
+                vc.title = targetConversation.name
+                vc.navigationItem.largeTitleDisplayMode = .never
+                self?.navigationController?.pushViewController(vc, animated: false)
+            } else {
+                self?.createNewConversation(result: userResult)
+            }
         }
+        
         let navC = BaseNavigationController(rootViewController: newConVC)
         present(navC, animated: true, completion: nil)
     }
     
     private func createNewConversation(result: SearchResult) {
         let userName = result.name
-        let email = result.email
-        let messVC = ChatViewController.create(with: email, id: "")
-        messVC.title = userName
-        messVC.isNewConversation = true
-        navigationController?.pushViewController(messVC, animated: true)
+        let email = String.makeSafe(result.email)
+        
+        DatabaseManager.shared.conversationExisted(with: email) { [weak self] result in
+            switch result {
+            case .success(let conversationID):
+                let messVC = ChatViewController.create(with: email, id: conversationID)
+                messVC.title = userName
+                messVC.isNewConversation = true
+                self?.navigationController?.pushViewController(messVC, animated: true)
+            case .failure(_):
+                let messVC = ChatViewController.create(with: email, id: "")
+                messVC.title = userName
+                messVC.isNewConversation = true
+                self?.navigationController?.pushViewController(messVC, animated: true)
+            }
+        }
     }
     
     private func getConversations() {
