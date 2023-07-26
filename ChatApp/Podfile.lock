@@ -70,6 +70,12 @@ PODS:
   - MessageKit (3.8.0):
     - InputBarAccessoryView (~> 5.5.0)
   - PromisesObjC (2.2.0)
+  - RxCocoa (6.5.0):
+    - RxRelay (= 6.5.0)
+    - RxSwift (= 6.5.0)
+  - RxRelay (6.5.0):
+    - RxSwift (= 6.5.0)
+  - RxSwift (6.5.0)
   - SDWebImage (5.15.8):
     - SDWebImage/Core (= 5.15.8)
   - SDWebImage/Core (5.15.8)
@@ -84,6 +90,8 @@ DEPENDENCIES:
   - IQKeyboardManager
   - JGProgressHUD
   - MessageKit
+  - RxCocoa (= 6.5.0)
+  - RxSwift (= 6.5.0)
   - SDWebImage
   - SwiftDate
 
@@ -112,6 +120,9 @@ SPEC REPOS:
     - leveldb-library
     - MessageKit
     - PromisesObjC
+    - RxCocoa
+    - RxRelay
+    - RxSwift
     - SDWebImage
     - SwiftDate
 
@@ -139,9 +150,12 @@ SPEC CHECKSUMS:
   leveldb-library: f03246171cce0484482ec291f88b6d563699ee06
   MessageKit: a1ba0c69ebead94029867853eb44dd05b9b3f453
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
+  RxCocoa: 94f817b71c07517321eb4f9ad299112ca8af743b
+  RxRelay: 1de1523e604c72b6c68feadedd1af3b1b4d0ecbd
+  RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
   SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798
   SwiftDate: bbc26e26fc8c0c33fbee8c140c5e8a68293a148a
 
-PODFILE CHECKSUM: 71c19fdd27c4f067ba7880b760a4f0fc264a7089
+PODFILE CHECKSUM: 08fbad7ee7592039723a4bedc3c13526e1bf7632
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

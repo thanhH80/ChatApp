@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setupRoute()
         FirebaseApp.configure()
         KeyboardManager.setup()
+        setupMainWindow()
         
         ApplicationDelegate.shared.application(
             application,
@@ -51,5 +52,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func setupRoute() {
         AppUtils.setRootViewIsConversation()
+    }
+}
+
+extension AppDelegate {
+    
+    private func setupMainWindow(windowScene: UIWindowScene) {
+        let window = UIWindow(windowScene: windowScene)
+        let navController = BaseNavigationController()
+        let mainNavigator = MainNavigation(navigationController: navController)
+        mainNavigator.navigate(to: .)
+        window.rootViewController = navController
+        return window
     }
 }

@@ -20,16 +20,16 @@ variant_for_slice()
   "FBSDKLoginKit.xcframework/ios-arm64_armv7")
     echo ""
     ;;
+  "FBSDKLoginKit.xcframework/ios-arm64_i386_x86_64-simulator")
+    echo "simulator"
+    ;;
   "FBSDKLoginKit.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "maccatalyst"
-    ;;
-  "FBSDKLoginKit.xcframework/tvos-arm64_x86_64-simulator")
-    echo "simulator"
     ;;
   "FBSDKLoginKit.xcframework/tvos-arm64")
     echo ""
     ;;
-  "FBSDKLoginKit.xcframework/ios-arm64_i386_x86_64-simulator")
+  "FBSDKLoginKit.xcframework/tvos-arm64_x86_64-simulator")
     echo "simulator"
     ;;
   esac
@@ -41,17 +41,17 @@ archs_for_slice()
   "FBSDKLoginKit.xcframework/ios-arm64_armv7")
     echo "arm64 armv7"
     ;;
-  "FBSDKLoginKit.xcframework/ios-arm64_x86_64-maccatalyst")
-    echo "arm64 x86_64"
+  "FBSDKLoginKit.xcframework/ios-arm64_i386_x86_64-simulator")
+    echo "arm64 i386 x86_64"
     ;;
-  "FBSDKLoginKit.xcframework/tvos-arm64_x86_64-simulator")
+  "FBSDKLoginKit.xcframework/ios-arm64_x86_64-maccatalyst")
     echo "arm64 x86_64"
     ;;
   "FBSDKLoginKit.xcframework/tvos-arm64")
     echo "arm64"
     ;;
-  "FBSDKLoginKit.xcframework/ios-arm64_i386_x86_64-simulator")
-    echo "arm64 i386 x86_64"
+  "FBSDKLoginKit.xcframework/tvos-arm64_x86_64-simulator")
+    echo "arm64 x86_64"
     ;;
   esac
 }
@@ -135,5 +135,5 @@ install_xcframework() {
   echo "Copied $source to $destination"
 }
 
-install_xcframework "${PODS_ROOT}/FBSDKLoginKit/XCFrameworks/FBSDKLoginKit.xcframework" "FBSDKLoginKit" "framework" "ios-arm64_armv7" "ios-arm64_x86_64-maccatalyst" "ios-arm64_i386_x86_64-simulator"
+install_xcframework "${PODS_ROOT}/FBSDKLoginKit/XCFrameworks/FBSDKLoginKit.xcframework" "FBSDKLoginKit" "framework" "ios-arm64_armv7" "ios-arm64_i386_x86_64-simulator" "ios-arm64_x86_64-maccatalyst"
 
