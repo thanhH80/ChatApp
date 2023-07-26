@@ -73,6 +73,7 @@ class LoginViewController: BaseViewController {
                             return
                         }
                         UserDefaults.standard.userName = "\(firstName) \(lastName)"
+                        UserDefaults.standard.isLoggedIn = true
                     case .failure(let error):
                         print("Failed to get data from path \(error)")
                     }
@@ -178,6 +179,7 @@ class LoginViewController: BaseViewController {
                     }
                     return
                 }
+                UserDefaults.standard.isLoggedIn = true
                 strongSelf.navigateToHome()
             }
         }
@@ -192,8 +194,9 @@ extension LoginViewController: LoginButtonDelegate {
         let fbCredential = FacebookAuthProvider.credential(withAccessToken: token)
         
         let fbRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
-                                                   parameters: ["fields" :
-                                                                    "email, first_name, last_name, picture.type(large)"],
+                                                   parameters: [
+                                                    "fields" : "email, first_name, last_name, picture.type(large)"
+                                                   ],
                                                    tokenString: token,
                                                    version: nil,
                                                    httpMethod: .get)
@@ -244,6 +247,8 @@ extension LoginViewController: LoginButtonDelegate {
                             }.resume()
                         }
                     }
+                } else {
+                    print("User already exist")
                 }
             }
         }
@@ -259,6 +264,7 @@ extension LoginViewController: LoginButtonDelegate {
             }
             
             // Login success
+            UserDefaults.standard.isLoggedIn = true
             strongSelf.navigateToHome()
         }
     }

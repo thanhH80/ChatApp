@@ -17,6 +17,8 @@ target 'ChatApp' do
   pod 'MessageKit'
   pod 'SDWebImage'
   pod 'SwiftDate'
+  pod 'RxSwift', '6.5.0'
+  pod 'RxCocoa', '6.5.0'
   
   #UI
   pod 'IQKeyboardManager'

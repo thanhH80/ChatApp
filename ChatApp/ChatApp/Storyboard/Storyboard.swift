@@ -13,4 +13,5 @@ enum Storyboard: String {
     case mainTabbar = "MainTabbar"
     case profile = "Profile"
     case player = "Player"
+    case main = "Main"
 }

@@ -32,7 +32,7 @@ extension DatabaseManager {
     public func checkExistedUser(userEmail: String,
                                  completion: @escaping (Bool) -> Void) {
         dbRef.child(String.makeSafe(userEmail)).observeSingleEvent(of: .value) { snapshot in
-            guard snapshot.value as? String != nil else {
+            guard snapshot.exists() else {
                 completion(false)
                 return
             }
@@ -125,7 +125,7 @@ extension DatabaseManager {
                 ConversationResponse.date.string: dateString,
                 ConversationResponse.content.string: message,
                 ConversationResponse.isRead.string: false
-            ]
+            ] as [String : Any]
         ]
         return conversationEntry
     }
@@ -274,6 +274,38 @@ extension DatabaseManager {
             }
             completion(true)
         }
+    }
+    
+    /// Check conversation is existed or not
+    public func conversationExisted(with reciverEmail: String,
+                                    completion: @escaping (Result<String, DatabaseError>) -> Void) {
+        let senderEmail = UserDefaults.standard.userEmail
+        let safeSenderEmail = String.makeSafe(senderEmail)
+        let safeRecipEmail = String.makeSafe(reciverEmail)
+        
+        dbRef.child("\(safeRecipEmail)/\(ConversationResponse.conversations.string)").observeSingleEvent(of: .value) { snapshot in
+            guard let conversationCollection = snapshot.value as? [DatabaseEntryType] else {
+                completion(.failure(.failedToGetData))
+                return
+            }
+            
+            if let conversation = conversationCollection.first(where: {
+                guard let senderEmail = $0[ConversationResponse.otherEmail.string] as? String else {
+                    return false
+                }
+                return safeSenderEmail == senderEmail
+            }) {
+                guard let converID = conversation[ConversationResponse.id.string] as? String else {
+                    completion(.failure(.failedToGetData))
+                    return
+                }
+                completion(.success(converID))
+            }
+            
+            completion(.failure(.failedToGetData))
+            return
+        }
+        
     }
     
     /// Get all conversation for passed email
@@ -464,5 +496,41 @@ extension DatabaseManager {
                         }
                     }
             }
+    }
+    
+    /// Delete conversation with conversation ID
+    public func deleteConversation(with conversationID: String, completion: @escaping (Bool) -> Void) {
+        let userEmail = UserDefaults.standard.userEmail
+        let safeEmail = String.makeSafe(userEmail)
+        let conversationPath = "\(safeEmail)/\(ConversationResponse.conversations.string)"
+        dbRef.child(conversationPath).observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard var conversationCollection = snapshot.value as? [DatabaseEntryType] else {
+                completion(false)
+                return
+            }
+            
+            for (i, conversation) in conversationCollection.enumerated() {
+                if let converID = conversation[ConversationResponse.id.string] as? String,
+                   converID == conversationID {
+                    conversationCollection.remove(at: i)
+                    
+                    // delete conversation node
+                    self?.dbRef.child(conversationID).removeValue(completionBlock: { err, _ in
+                        guard err == nil else {
+                            completion(false)
+                            return
+                        }
+                    })
+                }
+            }
+            
+            self?.dbRef.child(conversationPath).setValue(conversationCollection) { error, _ in
+                guard error == nil else {
+                    completion(false)
+                    return
+                }
+            }
+            completion(true)
+        }
     }
 }
